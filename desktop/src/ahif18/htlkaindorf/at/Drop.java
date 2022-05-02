@@ -55,6 +55,7 @@ public class Drop extends ApplicationAdapter {
     private OrthographicCamera camera;
     private Rectangle moonCat;
     private Rectangle baseCat;
+    private Rectangle catHolder;
     private Array<Texture> catTextures;
     private Array<Cat> cats;
     private Array<Fish> raindrops;
@@ -113,6 +114,8 @@ public class Drop extends ApplicationAdapter {
         backgroundSprite =new Sprite(backgroundImage);
         backgroundBridgesSprite = new Sprite(backgroundImageBridges);
         catHolderSprite = new Sprite(catHolderImage);
+
+        catHolder = new Rectangle(630,240,34*5, 48*5);
 
         font = FontGenerator.generateFreetypeFont(16, Color.WHITE);
 
@@ -255,7 +258,7 @@ public class Drop extends ApplicationAdapter {
         shapeRenderer = new ShapeRenderer();
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        for(int i=0; i<= riverHitbox.length -1; i++){
+        *//*for(int i=0; i<= riverHitbox.length -1; i++){
             shapeRenderer.rect(riverHitbox[i].x, riverHitbox[i].y, riverHitbox[i].getWidth(), riverHitbox[i].getHeight(), com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY);
         }
         if(!cats.isEmpty()){
@@ -263,10 +266,10 @@ public class Drop extends ApplicationAdapter {
                 shapeRenderer.rect(cats.get(i).getRange().x, cats.get(i).getRange().y, cats.get(i).getRange().getWidth(), cats.get(i).getRange().getHeight(), com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY);
                 shapeRenderer.rect(cats.get(i).getBody().x, cats.get(i).getBody().y, cats.get(i).getBody().getWidth(), cats.get(i).getBody().getHeight(), com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY);
             }
-        }
+        }*//*
+        shapeRenderer.rect(catHolder.x, catHolder.y, catHolder.width, catHolder.height);
+        shapeRenderer.end();*/
 
-        shapeRenderer.end();
-        */
         // process user input
         if(Gdx.input.isButtonPressed(Input.Buttons.LEFT)){
             Vector3 touchPos = new Vector3(Gdx.input.getX(),Gdx.input.getY(),0);
@@ -316,6 +319,10 @@ public class Drop extends ApplicationAdapter {
                                 break;
                             }
                         }
+                        if(catPosition.overlaps(catHolder)){
+                            helpOverlaps = false;
+                        }
+
                         //If the cats DONT overlap with the river OR any other cats AND the gold amount is above CAT_COST you can spawn the cat
                         if (helpOverlaps && gold >= getCatCost(checkWhichCat)) {
                             gold -= getCatCost(checkWhichCat);
