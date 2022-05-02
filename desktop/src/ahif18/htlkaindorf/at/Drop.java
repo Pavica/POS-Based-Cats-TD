@@ -1,16 +1,16 @@
 package ahif18.htlkaindorf.at;
 
-import java.awt.*;
 import java.util.Iterator;
 
 import ahif18.htlkaindorf.at.cats.BaseCat;
 import ahif18.htlkaindorf.at.cats.Cat;
 import ahif18.htlkaindorf.at.cats.MoonCat;
+import ahif18.htlkaindorf.at.fishes.ClownFish;
 import ahif18.htlkaindorf.at.fishes.Fish;
+import ahif18.htlkaindorf.at.fishes.VomitFish;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -19,13 +19,11 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
-import org.w3c.dom.css.Rect;
 
 public class Drop extends ApplicationAdapter {
     private static int MAX_HEALTH = 100;
@@ -34,16 +32,18 @@ public class Drop extends ApplicationAdapter {
     private int gold = 1000;
     private int speed = 1000000000;
     private int health = MAX_HEALTH;
+    private int countFish = 0;
 
-    private Texture dropImage;
-    private Texture dropImageRotated;
+    private Texture clownFish;
+    private Texture vomitFish;
+    private Texture clownFishRotated;
+    private Texture vomitFishRotated;
     private Texture backgroundImage;
     private Texture backgroundImageBridges;
     private Texture baseCatImage;
     private Texture moonCatImage;
     private Texture catHolderImage;
 
-    private Sprite dropSprite;
     private Sprite backgroundSprite;
     private Sprite backgroundBridgesSprite;
     private Sprite catHolderSprite;
@@ -57,8 +57,9 @@ public class Drop extends ApplicationAdapter {
     private Rectangle baseCat;
     private Rectangle catHolder;
     private Array<Texture> catTextures;
-    private Array<Cat> cats;
-    private Array<Fish> raindrops;
+    private Array<Texture> fishTextures;
+    private Array<Cat> allCats;
+    private Array<Fish> allFish;
     private long lastDropTime;
     private boolean isMoving = false;
 
@@ -99,8 +100,10 @@ public class Drop extends ApplicationAdapter {
         // load the images for the droplet and the moonCat, 32x32 pixels each
         backgroundImage = new Texture(Gdx.files.internal("background.png"));
         backgroundImageBridges = new Texture(Gdx.files.internal("background-2.png"));
-        dropImage = new Texture(Gdx.files.internal("fish.png"));
-        dropImageRotated = new Texture(Gdx.files.internal("fish2.png"));
+        clownFish = new Texture(Gdx.files.internal("fish.png"));
+        vomitFish = new Texture(Gdx.files.internal("vomitFish.png"));
+        clownFishRotated = new Texture(Gdx.files.internal("fish2.png"));
+        vomitFishRotated = new Texture(Gdx.files.internal("vomitFish2.png"));
         moonCatImage = new Texture(Gdx.files.internal("moonCat.png"));
         baseCatImage = new Texture(Gdx.files.internal("BaseCat.png"));
         moonCatImage = new Texture(Gdx.files.internal("moonCat.png"));
@@ -110,7 +113,12 @@ public class Drop extends ApplicationAdapter {
         catTextures.add(baseCatImage);
         catTextures.add(moonCatImage);
 
-        dropSprite = new Sprite(dropImage);
+        fishTextures = new Array<>();
+        fishTextures.add(clownFish);
+        fishTextures.add(clownFishRotated);
+        fishTextures.add(vomitFish);
+        fishTextures.add(vomitFishRotated);
+
         backgroundSprite =new Sprite(backgroundImage);
         backgroundBridgesSprite = new Sprite(backgroundImageBridges);
         catHolderSprite = new Sprite(catHolderImage);
@@ -139,16 +147,25 @@ public class Drop extends ApplicationAdapter {
         baseCat = new Rectangle(715, 345, Cat.catWidth, Cat.catHeight);
 
         // create the raindrops array and spawn the first raindrop
-        raindrops = new Array<Fish>();
-        spawnRaindrop();
+        allFish = new Array<Fish>();
+        spawnFish();
 
-        cats = new Array<Cat>();
+        allCats = new Array<Cat>();
     }
 
-    private void spawnRaindrop() {
-        Fish raindrop = new Fish(0, new Rectangle(points[0].x,points[0].y,32,32));
-        raindrops.add(raindrop);
+    private void spawnFish() {
+
+        if(countFish % 5 == 0){
+            Fish vomitfish = new VomitFish(0, new Rectangle(points[0].x,points[0].y,32,32), 250, 50, 1);
+            allFish.add(vomitfish);
+        }
+        if(countFish % 5 != 0){
+            Fish clownfish = new ClownFish(0, new Rectangle(points[0].x,points[0].y,32,32), 100, 5, 0);
+            allFish.add(clownfish);
+        }
+
         lastDropTime = TimeUtils.nanoTime();
+        countFish++;
     }
 
     //add x, y coordinates to spawn the cat where you drag it
@@ -161,12 +178,12 @@ public class Drop extends ApplicationAdapter {
             case 0:
                 Cat basecat = new BaseCat(new Rectangle(screenX - 64, screenY - 64, 128, 128),
                         new Rectangle(screenX - 32, screenY - 32, 64, 64));
-                cats.add(basecat);
+                allCats.add(basecat);
                 break;
             case 1:
                 Cat moonCat = new MoonCat(new Rectangle(screenX - 64, screenY - 64, 128, 128),
                         new Rectangle(screenX - 32, screenY - 32, 64, 64));
-                cats.add(moonCat);
+                allCats.add(moonCat);
                 break;
             default:
                 System.out.println("No cats found");
@@ -218,11 +235,12 @@ public class Drop extends ApplicationAdapter {
         batch.draw(backgroundImage, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         //Fish
-        for(Fish raindrop: raindrops) {
-            if(raindrop.isDirectionLeft()){
-                batch.draw(dropImage, raindrop.getRectangle().x, raindrop.getRectangle().y, 32,32);
+        for(Fish fish: allFish) {
+            if(fish.isDirectionLeft()){
+                batch.draw(fishTextures.get(fish.getTextureID()), fish.getRectangle().x, fish.getRectangle().y, 32,32);
+
             }else{
-                batch.draw(dropImageRotated, raindrop.getRectangle().x, raindrop.getRectangle().y, 32, 32);
+                batch.draw(fishTextures.get(fish.getTextureID()+1), fish.getRectangle().x, fish.getRectangle().y, 32, 32);
             }
         }
 
@@ -234,8 +252,8 @@ public class Drop extends ApplicationAdapter {
         if(Gdx.input.isButtonPressed(Input.Buttons.LEFT)){
 
         }
-        for(int i=0; i<cats.size; i++){
-            batch.draw(catTextures.get(cats.get(i).getTextureID()), cats.get(i).getBody().x, cats.get(i).getBody().y, Cat.catWidth, Cat.catHeight);
+        for(int i = 0; i< allCats.size; i++){
+            batch.draw(catTextures.get(allCats.get(i).getTextureID()), allCats.get(i).getBody().x, allCats.get(i).getBody().y, Cat.catWidth, Cat.catHeight);
         }
 
         //Cat Holder
@@ -313,7 +331,7 @@ public class Drop extends ApplicationAdapter {
                                 break;
                             }
                         }
-                        for (Cat cat : cats) {
+                        for (Cat cat : allCats) {
                             if (catPosition.overlaps(cat.getBody())) {
                                 helpOverlaps = false;
                                 break;
@@ -387,12 +405,12 @@ public class Drop extends ApplicationAdapter {
         if(moonCat.x > 800 - 32) moonCat.x = 800 - 32;
 
         // check if we need to create a new raindrop
-        if(TimeUtils.nanoTime() - lastDropTime > speed) spawnRaindrop();
+        if(TimeUtils.nanoTime() - lastDropTime > speed) spawnFish();
         speed *= 0.9995;
         // move the raindrops, remove any that are beneath the bottom edge of
         // the screen or that hit the moonCat. In the latter case we play back
         // a sound effect as well.
-        for (Iterator<Fish> iter = raindrops.iterator(); iter.hasNext(); ) {
+        for (Iterator<Fish> iter = allFish.iterator(); iter.hasNext(); ) {
             Fish raindrop = iter.next();
 
             if(raindrop.getRectangle().overlaps(points[raindrop.getCurrentPoint()]) && raindrop.getCurrentPoint() != points.length-1){
@@ -420,11 +438,11 @@ public class Drop extends ApplicationAdapter {
                 iter.remove();
             }
 
-            for(int i=0; i< cats.size; i++){
-            if(TimeUtils.timeSinceMillis(cats.get(i).getCurrentInterval()) >= cats.get(i).getAttackInterval()) {
-                    if (cats.get(i).getRange().overlaps(raindrop.getRectangle())) {
-                        raindrop.setHealth(raindrop.getHealth() - cats.get(i).getDamage());
-                        cats.get(i).setCurrentInterval(TimeUtils.millis());
+            for(int i = 0; i< allCats.size; i++){
+            if(TimeUtils.timeSinceMillis(allCats.get(i).getCurrentInterval()) >= allCats.get(i).getAttackInterval()) {
+                    if (allCats.get(i).getRange().overlaps(raindrop.getRectangle())) {
+                        raindrop.setHealth(raindrop.getHealth() - allCats.get(i).getDamage());
+                        allCats.get(i).setCurrentInterval(TimeUtils.millis());
                     }
                 }
             }
@@ -445,8 +463,10 @@ public class Drop extends ApplicationAdapter {
     @Override
     public void dispose() {
         // dispose of all the native resources
-        dropImage.dispose();
-        dropImageRotated.dispose();
+        clownFish.dispose();
+        clownFishRotated.dispose();
+        vomitFish.dispose();
+        vomitFishRotated.dispose();
         //moonCatImage.dispose();
         backgroundImage.dispose();
         //dropSound.dispose();
