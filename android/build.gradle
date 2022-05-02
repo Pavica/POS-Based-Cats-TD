@@ -1,6 +1,6 @@
 android {
-    buildToolsVersion "30.0.2"
-    compileSdkVersion 31
+    buildToolsVersion "32.0.0"
+    compileSdkVersion 32
     sourceSets {
         main {
             manifest.srcFile 'AndroidManifest.xml'
@@ -19,7 +19,7 @@ android {
     defaultConfig {
         applicationId "ahif18.htlkaindorf.at"
         minSdkVersion 14
-        targetSdkVersion 31
+        targetSdkVersion 32
         versionCode 1
         versionName "1.0"
     }
