@@ -59,6 +59,7 @@ public class Drop extends ApplicationAdapter {
     private Array<Cat> cats;
     private Array<Fish> raindrops;
     private long lastDropTime;
+    private boolean isMoving = false;
 
     private Rectangle points[] = {
         new Rectangle(515,470,8,8),
@@ -274,7 +275,7 @@ public class Drop extends ApplicationAdapter {
 
             int checkWhichCat = checkWhichCat(touchPos.x,touchPos.y,rectangle);
 
-            if(checkWhichCat != -1) {
+            if(checkWhichCat != -1 && !isMoving) {
                 Gdx.input.setInputProcessor(new InputProcessor() {
                     @Override
                     public boolean keyDown(int keycode) {
@@ -298,6 +299,7 @@ public class Drop extends ApplicationAdapter {
 
                     @Override
                     public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+                        isMoving = false;
                         Vector3 touchPos = new Vector3(screenX, screenY, 0);
                         camera.unproject(touchPos);
                         Rectangle catPosition = new Rectangle(touchPos.x, touchPos.y, 0, 0);
@@ -332,13 +334,12 @@ public class Drop extends ApplicationAdapter {
                             default:
                                 System.out.println("No cats found");
                         }
-
-
                         return false;
                     }
 
                     @Override
                     public boolean touchDragged(int screenX, int screenY, int pointer) {
+                        isMoving = true;
                         Vector3 touchPos = new Vector3(screenX, screenX, 0);
                         camera.unproject(touchPos);
                         touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
