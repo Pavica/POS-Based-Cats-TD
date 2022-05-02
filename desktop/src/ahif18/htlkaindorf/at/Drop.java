@@ -1,5 +1,6 @@
 package ahif18.htlkaindorf.at;
 
+import java.awt.*;
 import java.util.Iterator;
 
 import ahif18.htlkaindorf.at.cats.Cat;
@@ -9,8 +10,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -25,7 +29,7 @@ public class Drop extends ApplicationAdapter {
     private static int MAX_HEALTH = 100;
     private static int HEALTH_LOSS = 25;
 
-    private int gold = 1000000000;
+    private int gold = 1000;
     private int speed = 1000000000;
     private int health = MAX_HEALTH;
 
@@ -43,6 +47,8 @@ public class Drop extends ApplicationAdapter {
     private Sprite catHolderSprite;
 
     private SpriteBatch batch;
+
+    private BitmapFont font;
 
     private OrthographicCamera camera;
     private Rectangle bucket;
@@ -83,6 +89,7 @@ public class Drop extends ApplicationAdapter {
 
     @Override
     public void create() {
+
         // load the images for the droplet and the bucket, 32x32 pixels each
         backgroundImage = new Texture(Gdx.files.internal("background.png"));
         backgroundImageBridges = new Texture(Gdx.files.internal("background-2.png"));
@@ -96,6 +103,8 @@ public class Drop extends ApplicationAdapter {
         backgroundSprite =new Sprite(backgroundImage);
         backgroundBridgesSprite = new Sprite(backgroundImageBridges);
         catHolderSprite = new Sprite(catHolderImage);
+
+        font = FontGenerator.generateFreetypeFont(16, Color.WHITE);
 
         // load the drop sound effect and the rain background "music"
         //dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.wav"));
@@ -190,6 +199,13 @@ public class Drop extends ApplicationAdapter {
         //Cat Holder
         catHolderSprite.draw(batch);
 
+        //Gold
+        GlyphLayout glyphLayout = new GlyphLayout();
+        String item = gold + "";
+        glyphLayout.setText(font,item);
+        float m = glyphLayout.width;
+        font.draw(batch, item, 755 - m, 460);
+
         //Cats inside holder (dummys)
         batch.draw(moonCatImage, bucket.x, bucket.y, 75,75);
         batch.end();
@@ -212,77 +228,87 @@ public class Drop extends ApplicationAdapter {
         shapeRenderer.end();
         */
         // process user input
-            Gdx.input.setInputProcessor(new InputProcessor() {
-            @Override
-            public boolean keyDown(int keycode) {
-                return false;
-            }
+        if(Gdx.input.isButtonPressed(Input.Buttons.LEFT)){
+            Vector3 touchPos = new Vector3(Gdx.input.getX(),Gdx.input.getY(),0);
+            camera.unproject(touchPos);
+            Rectangle rectangle = new Rectangle(touchPos.x, touchPos.y, 0,0);
 
-            @Override
-            public boolean keyUp(int keycode) {
-                return false;
-            }
+            if(rectangle.overlaps(new Rectangle(645, 345, 75,75))) {
 
-            @Override
-            public boolean keyTyped(char character) {
-                return false;
-            }
-
-            @Override
-            public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-                return true;
-            }
-
-            @Override
-            public boolean touchUp(int screenX, int screenY, int pointer, int button) {
-                Vector3 touchPos = new Vector3(Gdx.input.getX(),Gdx.input.getY(),0);
-                camera.unproject(touchPos);
-                Rectangle catPosition = new Rectangle(touchPos.x, touchPos.y, 0,0);
-                boolean helpOverlaps = true;
-                for(Rectangle riverPoint : riverHitbox){
-                    if(catPosition.overlaps(riverPoint)){
-                        helpOverlaps = false;
-                        break;
+                Gdx.input.setInputProcessor(new InputProcessor() {
+                    @Override
+                    public boolean keyDown(int keycode) {
+                        return false;
                     }
-                }
-                for(Cat cat : cats){
-                    if(catPosition.overlaps(cat.getBody())){
-                        helpOverlaps = false;
-                        break;
+
+                    @Override
+                    public boolean keyUp(int keycode) {
+                        return false;
                     }
-                }
-                //If the cats DONT overlap with the river OR any other cats AND the gold amount is above CAT_COST you can spawn the cat
-                if(helpOverlaps && gold >= 250){
-                    gold -= 250;
-                    spawnCat(touchPos.x, touchPos.y);
-                }
-                bucket.x = 645;
-                bucket.y = 345;
-                return false;
-            }
 
-            @Override
-            public boolean touchDragged(int screenX, int screenY, int pointer) {
-                Vector3 touchPos = new Vector3(Gdx.input.getX(),Gdx.input.getY(),0);
-                camera.unproject(touchPos);
-                touchPos.set(Gdx.input.getX(), Gdx.input.getY(),0);
-                camera.unproject(touchPos);
-                bucket.x = touchPos.x - 75 / 2;
-                bucket.y = touchPos.y - 75/ 2;
-                return false;
-            }
+                    @Override
+                    public boolean keyTyped(char character) {
+                        return false;
+                    }
 
-            @Override
-            public boolean mouseMoved(int screenX, int screenY) {
-                return false;
-            }
+                    @Override
+                    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+                        return true;
+                    }
 
-            @Override
-            public boolean scrolled(float amountX, float amountY) {
-                return false;
-            }
-        });
+                    @Override
+                    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+                        Vector3 touchPos = new Vector3(screenX, screenY, 0);
+                        camera.unproject(touchPos);
+                        Rectangle catPosition = new Rectangle(touchPos.x, touchPos.y, 0, 0);
+                        boolean helpOverlaps = true;
+                        for (Rectangle riverPoint : riverHitbox) {
+                            if (catPosition.overlaps(riverPoint)) {
+                                helpOverlaps = false;
+                                break;
+                            }
+                        }
+                        for (Cat cat : cats) {
+                            if (catPosition.overlaps(cat.getBody())) {
+                                helpOverlaps = false;
+                                break;
+                            }
+                        }
+                        //If the cats DONT overlap with the river OR any other cats AND the gold amount is above CAT_COST you can spawn the cat
+                        if (helpOverlaps && gold >= 250) {
+                            gold -= 250;
+                            spawnCat(touchPos.x, touchPos.y);
+                        }
+                        bucket.x = 645;
+                        bucket.y = 345;
+                        return false;
+                    }
 
+                    @Override
+                    public boolean touchDragged(int screenX, int screenY, int pointer) {
+                        Vector3 touchPos = new Vector3(screenX, screenX, 0);
+                        camera.unproject(touchPos);
+                        touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+                        camera.unproject(touchPos);
+                        bucket.x = touchPos.x - 75 / 2;
+                        bucket.y = touchPos.y - 75 / 2;
+                        return false;
+                    }
+
+                    @Override
+                    public boolean mouseMoved(int screenX, int screenY) {
+                        return false;
+                    }
+
+                    @Override
+                    public boolean scrolled(float amountX, float amountY) {
+                        return false;
+                    }
+                });
+            }
+        }else{
+            Gdx.input.setInputProcessor(null);
+        }
 
         // make sure the bucket stays within the screen bounds
         if(bucket.x < 0) bucket.x = 0;
