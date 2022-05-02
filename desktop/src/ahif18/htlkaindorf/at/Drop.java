@@ -16,6 +16,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -106,6 +107,8 @@ public class Drop extends ApplicationAdapter {
         backgroundSprite =new Sprite(backgroundImage);
         backgroundBridgesSprite = new Sprite(backgroundImageBridges);
         catHolderSprite = new Sprite(catHolderImage);
+
+        font = FontGenerator.generateFreetypeFont(16, Color.WHITE);
 
         // load the drop sound effect and the rain background "music"
         //dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.wav"));
@@ -203,6 +206,11 @@ public class Drop extends ApplicationAdapter {
         catHolderSprite.draw(batch);
 
         //Gold
+        GlyphLayout glyphLayout = new GlyphLayout();
+        String item = gold + "";
+        glyphLayout.setText(font,item);
+        float m = glyphLayout.width;
+        font.draw(batch, item, 755 - m, 460);
 
         //Cats inside holder (dummys)
         batch.draw(moonCatImage, bucket.x, bucket.y, 75,75);
