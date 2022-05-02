@@ -8,24 +8,28 @@ import com.badlogic.gdx.math.Rectangle;
 import org.lwjgl.system.CallbackI;
 
 public class Fish {
-    private int health = 100;
+    private int health;
     private int currentPoint;
     private Rectangle rectangle;
     private boolean directionLeft = true;
-    private int goldDrop = 5;
+    private int goldDrop;
+    private int textureID;
 
-    public Fish(int currentPoint, Rectangle rectangle) {
+    public Fish(int currentPoint, Rectangle rectangle, int health, int goldDrop, int textureID) {
         this.currentPoint = currentPoint;
         this.rectangle = rectangle;
+        this.health = health;
+        this.goldDrop = goldDrop;
     }
 
     public int getGoldDrop() {
         return goldDrop;
     }
 
+    /*
     public void setGoldDrop(int goldDrop) {
         this.goldDrop = goldDrop;
-    }
+    }*/
 
     public int getHealth() { return health; }
 
@@ -53,6 +57,10 @@ public class Fish {
 
     public void setCurrentPoint(int currentPoint) {
         this.currentPoint = currentPoint;
+    }
+
+    public int getTextureID() {
+        return textureID;
     }
 }
 
