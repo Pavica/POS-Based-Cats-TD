@@ -3,7 +3,9 @@ package ahif18.htlkaindorf.at;
 import java.awt.*;
 import java.util.Iterator;
 
+import ahif18.htlkaindorf.at.cats.BaseCat;
 import ahif18.htlkaindorf.at.cats.Cat;
+import ahif18.htlkaindorf.at.cats.MoonCat;
 import ahif18.htlkaindorf.at.fishes.Fish;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -38,6 +40,7 @@ public class Drop extends ApplicationAdapter {
     private Texture backgroundImage;
     private Texture backgroundImageBridges;
     private Texture bucketImage;
+    private Texture baseCatImage;
     private Texture moonCatImage;
     private Texture catHolderImage;
 
@@ -96,6 +99,7 @@ public class Drop extends ApplicationAdapter {
         dropImage = new Texture(Gdx.files.internal("fish.png"));
         dropImageRotated = new Texture(Gdx.files.internal("fish2.png"));
         bucketImage = new Texture(Gdx.files.internal("bucket.png"));
+        baseCatImage = new Texture(Gdx.files.internal("BaseCat.png"));
         moonCatImage = new Texture(Gdx.files.internal("MoonCat.png"));
         catHolderImage = new Texture(Gdx.files.internal("catHolder.png"));
 
@@ -146,10 +150,12 @@ public class Drop extends ApplicationAdapter {
         //for some reason the cat is a bit further to the right than it should be, you cna compensate for this by just making
         // the values uneven but i think that will break some automation down the line, but it probably wont be an issue considering
         // all the cats are the same so you would just have to decrease or increase it by a certain amount
-        Cat cat = new Cat(new Rectangle(screenX-64, screenY-64,128,128),
-                new Rectangle(screenX-32, screenY-32,64,64)
-                , 100, 500);
-        cats.add(cat);
+        Cat basecat = new BaseCat(new Rectangle(screenX-64, screenY-64,128,128),
+                new Rectangle(screenX-32, screenY-32,64,64));
+        Cat mooncat = new MoonCat(new Rectangle(screenX-64, screenY-64,128,128),
+                new Rectangle(screenX-32, screenY-32,64,64));
+        cats.add(basecat);
+        cats.add(mooncat);
     }
 
     @Override
@@ -208,6 +214,7 @@ public class Drop extends ApplicationAdapter {
 
         //Cats inside holder (dummys)
         batch.draw(moonCatImage, bucket.x, bucket.y, 75,75);
+        batch.draw(baseCatImage, 715, 345, 75,75);
         batch.end();
         /*
         //RENDER THE HITBOX OF THE RIVER WHICH IS USED FOR DISALLOWING THE PLACEMENT OF CATS ON IT

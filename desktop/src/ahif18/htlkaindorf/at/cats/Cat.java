@@ -16,7 +16,9 @@ public class Cat {
         this.attackInterval = attackInterval;
     }
 
-    public Rectangle getBody() { return body; }
+    public Rectangle getBody() {
+        return body;
+    }
 
     public long getCurrentInterval() {
         return currentInterval;
@@ -30,7 +32,11 @@ public class Cat {
         return attackInterval;
     }
 
-    public int getDamage() { return damage; }
+    public int getDamage() {
+        return damage;
+    }
 
-    public Rectangle getRange() { return range; }
+    public Rectangle getRange() {
+        return range;
+    }
 }

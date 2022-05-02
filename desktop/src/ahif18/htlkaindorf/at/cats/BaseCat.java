@@ -2,10 +2,9 @@ package ahif18.htlkaindorf.at.cats;
 
 import com.badlogic.gdx.math.Rectangle;
 
-/*
-class BaseCat extends Cat{
+public class BaseCat extends Cat{
 
-    public BaseCat(){
-        super();
+    public BaseCat(Rectangle range, Rectangle body) {
+        super(range, body, 50, 1000);
     }
-}*/
+}

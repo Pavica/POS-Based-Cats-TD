@@ -6,7 +6,7 @@
 	<inherits name='com.badlogic.gdx.controllers.controllers-gwt' />
 	<inherits name='com.badlogic.ashley_gwt' />
 
-	<inherits name='BasedCats' />
+	<inherits name='MyGdxGame' />
 	<entry-point class='ahif18.htlkaindorf.at.client.HtmlLauncher' />
 	<set-configuration-property name='xsiframe.failIfScriptTag' value='FALSE'/>
 	<set-configuration-property name="gdx.assetpath" value="../assets" />
