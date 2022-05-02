@@ -39,7 +39,6 @@ public class Drop extends ApplicationAdapter {
     private Texture dropImageRotated;
     private Texture backgroundImage;
     private Texture backgroundImageBridges;
-    private Texture bucketImage;
     private Texture baseCatImage;
     private Texture moonCatImage;
     private Texture catHolderImage;
@@ -54,7 +53,9 @@ public class Drop extends ApplicationAdapter {
     private BitmapFont font;
 
     private OrthographicCamera camera;
-    private Rectangle bucket;
+    private Rectangle moonCat;
+    private Rectangle baseCat;
+    private Array<Texture> catTextures;
     private Array<Cat> cats;
     private Array<Fish> raindrops;
     private long lastDropTime;
@@ -93,15 +94,19 @@ public class Drop extends ApplicationAdapter {
     @Override
     public void create() {
 
-        // load the images for the droplet and the bucket, 32x32 pixels each
+        // load the images for the droplet and the moonCat, 32x32 pixels each
         backgroundImage = new Texture(Gdx.files.internal("background.png"));
         backgroundImageBridges = new Texture(Gdx.files.internal("background-2.png"));
         dropImage = new Texture(Gdx.files.internal("fish.png"));
         dropImageRotated = new Texture(Gdx.files.internal("fish2.png"));
-        bucketImage = new Texture(Gdx.files.internal("bucket.png"));
+        moonCatImage = new Texture(Gdx.files.internal("moonCat.png"));
         baseCatImage = new Texture(Gdx.files.internal("BaseCat.png"));
-        moonCatImage = new Texture(Gdx.files.internal("MoonCat.png"));
+        moonCatImage = new Texture(Gdx.files.internal("moonCat.png"));
         catHolderImage = new Texture(Gdx.files.internal("catHolder.png"));
+
+        catTextures = new Array<>();
+        catTextures.add(baseCatImage);
+        catTextures.add(moonCatImage);
 
         dropSprite = new Sprite(dropImage);
         backgroundSprite =new Sprite(backgroundImage);
@@ -123,14 +128,11 @@ public class Drop extends ApplicationAdapter {
         camera.setToOrtho(false, 800, 480);
         batch = new SpriteBatch();
 
-        //USE BUCKET CODE FOR MOVING THE CATS WITH MOUSE
+        //USE moonCat CODE FOR MOVING THE CATS WITH MOUSE
 
-        // create a Rectangle to logically represent the bucket
-        bucket = new Rectangle();
-        bucket.x = 645; // center the bucket horizontally
-        bucket.y = 345; // bottom left corner of the bucket is 20 pixels above the bottom screen edge
-        bucket.width = 75;
-        bucket.height = 75;
+        // create a Rectangle to logically represent the moonCat
+        moonCat = new Rectangle(645, 345,  Cat.catWidth, Cat.catHeight);
+        baseCat = new Rectangle(715, 345, Cat.catWidth, Cat.catHeight);
 
         // create the raindrops array and spawn the first raindrop
         raindrops = new Array<Fish>();
@@ -146,16 +148,46 @@ public class Drop extends ApplicationAdapter {
     }
 
     //add x, y coordinates to spawn the cat where you drag it
-    private void spawnCat(float screenX, float screenY){
+    private void spawnCat(float screenX, float screenY, int catID){
         //for some reason the cat is a bit further to the right than it should be, you cna compensate for this by just making
         // the values uneven but i think that will break some automation down the line, but it probably wont be an issue considering
         // all the cats are the same so you would just have to decrease or increase it by a certain amount
-        Cat basecat = new BaseCat(new Rectangle(screenX-64, screenY-64,128,128),
-                new Rectangle(screenX-32, screenY-32,64,64));
-        Cat mooncat = new MoonCat(new Rectangle(screenX-64, screenY-64,128,128),
-                new Rectangle(screenX-32, screenY-32,64,64));
-        cats.add(basecat);
-        cats.add(mooncat);
+
+        switch (catID) {
+            case 0:
+                Cat basecat = new BaseCat(new Rectangle(screenX - 64, screenY - 64, 128, 128),
+                        new Rectangle(screenX - 32, screenY - 32, 64, 64));
+                cats.add(basecat);
+                break;
+            case 1:
+                Cat moonCat = new MoonCat(new Rectangle(screenX - 64, screenY - 64, 128, 128),
+                        new Rectangle(screenX - 32, screenY - 32, 64, 64));
+                cats.add(moonCat);
+                break;
+            default:
+                System.out.println("No cats found");
+        }
+    }
+
+    private int checkWhichCat(float screenX, float screenY, Rectangle rectangle){
+        if(rectangle.overlaps(new Rectangle(645,345,75,75))){
+            return 1;
+        }else if(rectangle.overlaps(new Rectangle(715,345,75,75))){
+            return 0;
+        }
+        return -1;
+    }
+
+    private int getCatCost(int catID){
+        switch (catID) {
+            case 0:
+                return 100;
+            case 1:
+                return 250;
+            default:
+                System.out.println("No cats found");
+        }
+        return -1;
     }
 
     @Override
@@ -173,7 +205,7 @@ public class Drop extends ApplicationAdapter {
         // coordinate system specified by the camera.
         batch.setProjectionMatrix(camera.combined);
 
-        // begin a new batch and draw the bucket and
+        // begin a new batch and draw the moonCat and
         // all drops
         batch.begin();
         backgroundSprite.draw(batch);
@@ -199,7 +231,7 @@ public class Drop extends ApplicationAdapter {
 
         }
         for(int i=0; i<cats.size; i++){
-            batch.draw(moonCatImage, cats.get(i).getBody().x, cats.get(i).getBody().y, 75, 75);
+            batch.draw(catTextures.get(cats.get(i).getTextureID()), cats.get(i).getBody().x, cats.get(i).getBody().y, Cat.catWidth, Cat.catHeight);
         }
 
         //Cat Holder
@@ -213,8 +245,8 @@ public class Drop extends ApplicationAdapter {
         font.draw(batch, item, 755 - m, 460);
 
         //Cats inside holder (dummys)
-        batch.draw(moonCatImage, bucket.x, bucket.y, 75,75);
-        batch.draw(baseCatImage, 715, 345, 75,75);
+        batch.draw(moonCatImage, moonCat.x, moonCat.y, Cat.catWidth, Cat.catHeight);
+        batch.draw(baseCatImage, baseCat.x, baseCat.y, Cat.catWidth ,Cat.catHeight);
         batch.end();
         /*
         //RENDER THE HITBOX OF THE RIVER WHICH IS USED FOR DISALLOWING THE PLACEMENT OF CATS ON IT
@@ -240,8 +272,9 @@ public class Drop extends ApplicationAdapter {
             camera.unproject(touchPos);
             Rectangle rectangle = new Rectangle(touchPos.x, touchPos.y, 0,0);
 
-            if(rectangle.overlaps(new Rectangle(645, 345, 75,75))) {
+            int checkWhichCat = checkWhichCat(touchPos.x,touchPos.y,rectangle);
 
+            if(checkWhichCat != -1) {
                 Gdx.input.setInputProcessor(new InputProcessor() {
                     @Override
                     public boolean keyDown(int keycode) {
@@ -282,12 +315,25 @@ public class Drop extends ApplicationAdapter {
                             }
                         }
                         //If the cats DONT overlap with the river OR any other cats AND the gold amount is above CAT_COST you can spawn the cat
-                        if (helpOverlaps && gold >= 250) {
-                            gold -= 250;
-                            spawnCat(touchPos.x, touchPos.y);
+                        if (helpOverlaps && gold >= getCatCost(checkWhichCat)) {
+                            gold -= getCatCost(checkWhichCat);
+                            spawnCat(touchPos.x, touchPos.y, checkWhichCat);
                         }
-                        bucket.x = 645;
-                        bucket.y = 345;
+
+                        switch (checkWhichCat) {
+                            case 0:
+                                baseCat.x = 715;
+                                baseCat.y = 345;
+                                break;
+                            case 1:
+                                moonCat.x = 645;
+                                moonCat.y = 345;
+                                break;
+                            default:
+                                System.out.println("No cats found");
+                        }
+
+
                         return false;
                     }
 
@@ -297,8 +343,19 @@ public class Drop extends ApplicationAdapter {
                         camera.unproject(touchPos);
                         touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
                         camera.unproject(touchPos);
-                        bucket.x = touchPos.x - 75 / 2;
-                        bucket.y = touchPos.y - 75 / 2;
+
+                        switch (checkWhichCat) {
+                            case 0:
+                                baseCat.x = touchPos.x - Cat.catWidth  / 2;
+                                baseCat.y = touchPos.y - Cat.catHeight / 2;
+                                break;
+                            case 1:
+                                moonCat.x = touchPos.x - Cat.catWidth  / 2;
+                                moonCat.y = touchPos.y - Cat.catHeight / 2;
+                                break;
+                            default:
+                                System.out.println("No cats found");
+                        }
                         return false;
                     }
 
@@ -317,15 +374,15 @@ public class Drop extends ApplicationAdapter {
             Gdx.input.setInputProcessor(null);
         }
 
-        // make sure the bucket stays within the screen bounds
-        if(bucket.x < 0) bucket.x = 0;
-        if(bucket.x > 800 - 32) bucket.x = 800 - 32;
+        // make sure the moonCat stays within the screen bounds
+        if(moonCat.x < 0) moonCat.x = 0;
+        if(moonCat.x > 800 - 32) moonCat.x = 800 - 32;
 
         // check if we need to create a new raindrop
         if(TimeUtils.nanoTime() - lastDropTime > speed) spawnRaindrop();
         speed *= 0.9995;
         // move the raindrops, remove any that are beneath the bottom edge of
-        // the screen or that hit the bucket. In the latter case we play back
+        // the screen or that hit the moonCat. In the latter case we play back
         // a sound effect as well.
         for (Iterator<Fish> iter = raindrops.iterator(); iter.hasNext(); ) {
             Fish raindrop = iter.next();
@@ -382,7 +439,7 @@ public class Drop extends ApplicationAdapter {
         // dispose of all the native resources
         dropImage.dispose();
         dropImageRotated.dispose();
-        bucketImage.dispose();
+        //moonCatImage.dispose();
         backgroundImage.dispose();
         //dropSound.dispose();
         //rainMusic.dispose();

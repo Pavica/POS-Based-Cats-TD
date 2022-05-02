@@ -3,17 +3,22 @@ package ahif18.htlkaindorf.at.cats;
 import com.badlogic.gdx.math.Rectangle;
 
 public class Cat {
+    public static float catWidth = 75;
+    public static float catHeight =75;
+
     private Rectangle range;
     private Rectangle body;
     private int damage;
     private float attackInterval;
     private long currentInterval = 0;
+    private int textureID;
 
-    public Cat(Rectangle range, Rectangle body, int damage, float attackInterval) {
+    public Cat(Rectangle range, Rectangle body, int damage, float attackInterval, int textureID) {
         this.range = range;
         this.body = body;
         this.damage = damage;
         this.attackInterval = attackInterval;
+        this.textureID = textureID;
     }
 
     public Rectangle getBody() {
@@ -34,6 +39,14 @@ public class Cat {
 
     public int getDamage() {
         return damage;
+    }
+
+    public int getTextureID() {
+        return textureID;
+    }
+
+    public void setTextureID(int textureID) {
+        this.textureID = textureID;
     }
 
     public Rectangle getRange() {
