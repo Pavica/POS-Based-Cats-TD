@@ -5,6 +5,6 @@ import com.badlogic.gdx.math.Rectangle;
 public class BaseCat extends Cat{
 
     public BaseCat(Rectangle range, Rectangle body) {
-        super(range, body, 50, 1000, 0);
+        super(range, body, 100, 1000, 0);
     }
 }
