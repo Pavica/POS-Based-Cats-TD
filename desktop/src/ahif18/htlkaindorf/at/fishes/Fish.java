@@ -14,23 +14,41 @@ public class Fish {
     private boolean directionLeft = true;
     private int goldDrop;
     private int textureID;
+    private int damage;
 
-    public Fish(int currentPoint, Rectangle rectangle, int health, int goldDrop, int textureID) {
+    private float fishWidth;
+    private float fishHeight;
+
+    public Fish(int currentPoint, Rectangle rectangle, int health, int goldDrop, int textureID, int damage, float fishWidth, float fishHeight) {
         this.currentPoint = currentPoint;
         this.rectangle = rectangle;
         this.health = health;
         this.goldDrop = goldDrop;
+        this.textureID = textureID;
+        this.damage = damage;
+        this.fishWidth = fishWidth;
+        this.fishHeight = fishHeight;
+    }
+
+    public int getDamage() {
+        return damage;
+    }
+
+    public float getFishWidth() {
+        return fishWidth;
+    }
+
+    public float getFishHeight() {
+        return fishHeight;
     }
 
     public int getGoldDrop() {
         return goldDrop;
     }
 
-    /*
     public void setGoldDrop(int goldDrop) {
         this.goldDrop = goldDrop;
-    }*/
-
+    }
     public int getHealth() { return health; }
 
     public void setHealth(int health) { this.health = health; }
