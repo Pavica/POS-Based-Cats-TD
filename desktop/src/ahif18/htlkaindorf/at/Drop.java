@@ -19,11 +19,13 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
+import org.lwjgl.system.CallbackI;
 
 public class Drop extends ApplicationAdapter {
     private static int MAX_HEALTH = 100;
@@ -62,6 +64,11 @@ public class Drop extends ApplicationAdapter {
     private Array<Fish> allFish;
     private long lastDropTime;
     private boolean isMoving = false;
+
+    private Vector3 catHolderPositions[] = {
+            new Vector3(645, 345,0),
+            new Vector3(715,345,0)
+    };
 
     private Rectangle points[] = {
         new Rectangle(515,470,8,8),
@@ -143,8 +150,9 @@ public class Drop extends ApplicationAdapter {
         //USE moonCat CODE FOR MOVING THE CATS WITH MOUSE
 
         // create a Rectangle to logically represent the moonCat
-        moonCat = new Rectangle(645, 345,  Cat.catWidth, Cat.catHeight);
-        baseCat = new Rectangle(715, 345, Cat.catWidth, Cat.catHeight);
+        baseCat = new Rectangle(catHolderPositions[0].x, catHolderPositions[0].y, Cat.catWidth, Cat.catHeight);
+        moonCat = new Rectangle(catHolderPositions[1].x, catHolderPositions[1].y,  Cat.catWidth, Cat.catHeight);
+
 
         // create the fishs array and spawn the first fish
         allFish = new Array<Fish>();
@@ -189,11 +197,11 @@ public class Drop extends ApplicationAdapter {
         }
     }
 
-    private int checkWhichCat(float screenX, float screenY, Rectangle rectangle){
-        if(rectangle.overlaps(new Rectangle(645,345,75,75))){
-            return 1;
-        }else if(rectangle.overlaps(new Rectangle(715,345,75,75))){
+    private int checkWhichCat(Rectangle rectangle){
+        if(rectangle.overlaps(new Rectangle(catHolderPositions[0].x,catHolderPositions[0].y,Cat.catWidth,Cat.catHeight))){
             return 0;
+        }else if(rectangle.overlaps(new Rectangle(catHolderPositions[1].x,catHolderPositions[1].y,Cat.catWidth,Cat.catHeight))){
+            return 1;
         }
         return -1;
     }
@@ -275,23 +283,23 @@ public class Drop extends ApplicationAdapter {
         batch.draw(moonCatImage, moonCat.x, moonCat.y, Cat.catWidth, Cat.catHeight);
         batch.draw(baseCatImage, baseCat.x, baseCat.y, Cat.catWidth ,Cat.catHeight);
         batch.end();
-        /*
+
         //RENDER THE HITBOX OF THE RIVER WHICH IS USED FOR DISALLOWING THE PLACEMENT OF CATS ON IT
         ShapeRenderer shapeRenderer;
         shapeRenderer = new ShapeRenderer();
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        *//*for(int i=0; i<= riverHitbox.length -1; i++){
+        for(int i=0; i<= riverHitbox.length -1; i++){
             shapeRenderer.rect(riverHitbox[i].x, riverHitbox[i].y, riverHitbox[i].getWidth(), riverHitbox[i].getHeight(), com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY);
         }
-        if(!cats.isEmpty()){
-            for(int i= 0; i< cats.size; i++){
-                shapeRenderer.rect(cats.get(i).getRange().x, cats.get(i).getRange().y, cats.get(i).getRange().getWidth(), cats.get(i).getRange().getHeight(), com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY);
-                shapeRenderer.rect(cats.get(i).getBody().x, cats.get(i).getBody().y, cats.get(i).getBody().getWidth(), cats.get(i).getBody().getHeight(), com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY);
+        if(!allCats.isEmpty()){
+            for(int i= 0; i< allCats.size; i++){
+                shapeRenderer.rect(allCats.get(i).getRange().x, allCats.get(i).getRange().y, allCats.get(i).getRange().getWidth(), allCats.get(i).getRange().getHeight(), com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY);
+                shapeRenderer.rect(allCats.get(i).getBody().x, allCats.get(i).getBody().y, allCats.get(i).getBody().getWidth(), allCats.get(i).getBody().getHeight(), com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY, com.badlogic.gdx.graphics.Color.GRAY);
             }
-        }*//*
+        }
         shapeRenderer.rect(catHolder.x, catHolder.y, catHolder.width, catHolder.height);
-        shapeRenderer.end();*/
+        shapeRenderer.end();
 
         // process user input
         if(Gdx.input.isButtonPressed(Input.Buttons.LEFT)){
@@ -299,7 +307,7 @@ public class Drop extends ApplicationAdapter {
             camera.unproject(touchPos);
             Rectangle rectangle = new Rectangle(touchPos.x, touchPos.y, 0,0);
 
-            int checkWhichCat = checkWhichCat(touchPos.x,touchPos.y,rectangle);
+            int checkWhichCat = checkWhichCat(rectangle);
 
             if(checkWhichCat != -1 && !isMoving) {
                 Gdx.input.setInputProcessor(new InputProcessor() {
@@ -354,12 +362,12 @@ public class Drop extends ApplicationAdapter {
 
                         switch (checkWhichCat) {
                             case 0:
-                                baseCat.x = 715;
-                                baseCat.y = 345;
+                                baseCat.x = catHolderPositions[0].x;
+                                baseCat.y = catHolderPositions[0].y;
                                 break;
                             case 1:
-                                moonCat.x = 645;
-                                moonCat.y = 345;
+                                moonCat.x = catHolderPositions[1].x;
+                                moonCat.y = catHolderPositions[1].y;
                                 break;
                             default:
                                 System.out.println("No cats found");
@@ -459,7 +467,6 @@ public class Drop extends ApplicationAdapter {
             if(fish.getHealth() <= 0){
                 iter.remove();
                 gold += fish.getGoldDrop();
-                System.out.println(gold);
             }
 
             if(health <= 0){
