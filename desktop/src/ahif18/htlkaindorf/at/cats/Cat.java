@@ -1,7 +1,11 @@
 package ahif18.htlkaindorf.at.cats;
 
 import com.badlogic.gdx.math.Rectangle;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
+@Data
+@AllArgsConstructor
 public class Cat {
     public static float CAT_WIDTH = 75;
     public static float CAT_HEIGHT = 75;
@@ -24,35 +28,5 @@ public class Cat {
         this.attackInterval = attackInterval;
         this.textureID = textureID;
         this.aoeAmount = aoeAmount;
-    }
-
-    public int getAoeAmount() {
-        return aoeAmount;
-    }
-
-    public Rectangle getBody() {
-        return body;
-    }
-
-    public long getCurrentInterval() {
-        return currentInterval;
-    }
-
-    public void setCurrentInterval(long currentInterval) {
-        this.currentInterval = currentInterval;
-    }
-
-    public float getAttackInterval() {
-        return attackInterval;
-    }
-
-    public int getDamage() {
-        return damage;
-    }
-
-    public int getTextureID() { return textureID; }
-
-    public Rectangle getRange() {
-        return range;
     }
 }

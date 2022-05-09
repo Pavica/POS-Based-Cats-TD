@@ -1,12 +1,9 @@
 package ahif18.htlkaindorf.at.fishes;
-
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
-import org.lwjgl.system.CallbackI;
+import jdk.nashorn.internal.ir.annotations.Ignore;
+import lombok.Data;
 
+@Data
 public class Fish {
     private int health;
     private int currentPoint;
@@ -28,55 +25,6 @@ public class Fish {
         this.damage = damage;
         this.fishWidth = fishWidth;
         this.fishHeight = fishHeight;
-    }
-
-    public int getDamage() { return damage; }
-
-    public float getFishWidth() {
-        return fishWidth;
-    }
-
-    public float getFishHeight() {
-        return fishHeight;
-    }
-
-    public int getGoldDrop() {
-        return goldDrop;
-    }
-
-    public void setGoldDrop(int goldDrop) {
-        this.goldDrop = goldDrop;
-    }
-    public int getHealth() { return health; }
-
-    public void setHealth(int health) { this.health = health; }
-
-    public boolean isDirectionLeft() {
-        return directionLeft;
-    }
-
-    public void setDirectionLeft(boolean directionLeft) {
-        this.directionLeft = directionLeft;
-    }
-
-    public Rectangle getRectangle() {
-        return rectangle;
-    }
-
-    public void setRectangle(Rectangle rectangle) {
-        this.rectangle = rectangle;
-    }
-
-    public int getCurrentPoint() {
-        return currentPoint;
-    }
-
-    public void setCurrentPoint(int currentPoint) {
-        this.currentPoint = currentPoint;
-    }
-
-    public int getTextureID() {
-        return textureID;
     }
 }
 
