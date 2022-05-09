@@ -11,7 +11,7 @@ public class BaseCat extends Cat{
         super(
             new Rectangle(x - RANGE_WIDTH/2,y - RANGE_HEIGHT/2,RANGE_WIDTH,RANGE_HEIGHT),
             new Rectangle(x- CAT_BODY_WIDTH/2,y - CAT_BODY_HEIGHT/2,CAT_BODY_WIDTH,CAT_BODY_HEIGHT),
-            1000,
+            100,
             500,
             0,
             0);
