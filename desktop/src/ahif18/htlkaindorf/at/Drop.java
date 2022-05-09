@@ -2,12 +2,12 @@ package ahif18.htlkaindorf.at;
 
 import java.util.Iterator;
 
-import ahif18.htlkaindorf.at.cats.BaseCat;
-import ahif18.htlkaindorf.at.cats.Cat;
-import ahif18.htlkaindorf.at.cats.MoonCat;
+import ahif18.htlkaindorf.at.cats.*;
+import ahif18.htlkaindorf.at.fishes.AnglerFish;
 import ahif18.htlkaindorf.at.fishes.ClownFish;
 import ahif18.htlkaindorf.at.fishes.Fish;
 import ahif18.htlkaindorf.at.fishes.VomitFish;
+import ahif18.htlkaindorf.at.libs.GifDecoder;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -15,20 +15,15 @@ import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
-import org.lwjgl.system.CallbackI;
 
 public class Drop extends ApplicationAdapter {
-    private static int MAX_HEALTH = 100;
+    private static final int MAX_HEALTH = 100;
 
     private int gold = 1000;
     private int speed = 1000000000;
@@ -36,13 +31,20 @@ public class Drop extends ApplicationAdapter {
     private int countFish = 0;
 
     private Texture clownFish;
-    private Texture vomitFish;
     private Texture clownFishRotated;
+    private Texture vomitFish;
     private Texture vomitFishRotated;
+    private Texture anglerFish;
+    private Texture anglerFishRotated;
+
     private Texture backgroundImage;
     private Texture backgroundImageBridges;
+
     private Texture baseCatImage;
     private Texture moonCatImage;
+    private Texture brownCatImage;
+    private Texture mooCatImage;
+
     private Texture catHolderImage;
     private Texture hit;
 
@@ -55,19 +57,34 @@ public class Drop extends ApplicationAdapter {
     private BitmapFont font;
 
     private OrthographicCamera camera;
+
+    private Array<Float> timeElapsed = new Array<>();
     private Rectangle moonCat;
+    Animation<TextureRegion> moonCatAnimation;
+
     private Rectangle baseCat;
+    Animation<TextureRegion> baseCatAnimation;
+
+    private Rectangle brownCat;
+    Animation<TextureRegion> brownCatAnimation;
+
+    private Rectangle mooCat;
+    Animation<TextureRegion> mooCatAnimation;
+
     private Rectangle catHolder;
-    private Array<Texture> catTextures;
+    private Array<Animation> catAnimations;
     private Array<Texture> fishTextures;
     private Array<Cat> allCats;
     private Array<Fish> allFish;
     private long lastDropTime;
     private boolean isMoving = false;
 
+    //0, 2, 3, 1
     private Vector3 catHolderPositions[] = {
             new Vector3(645, 345,0),
-            new Vector3(715,345,0)
+            new Vector3(715,265,0),
+            new Vector3(715,345,0),
+            new Vector3(645, 265,0),
     };
 
     private Rectangle points[] = {
@@ -107,24 +124,29 @@ public class Drop extends ApplicationAdapter {
         // load the images for the droplet and the moonCat, 32x32 pixels each
         backgroundImage = new Texture(Gdx.files.internal("backgroundElements/background.png"));
         backgroundImageBridges = new Texture(Gdx.files.internal("backgroundElements/background-2.png"));
+
         clownFish = new Texture(Gdx.files.internal("fishImages/fish.png"));
-        vomitFish = new Texture(Gdx.files.internal("fishImages/vomitFish.png"));
         clownFishRotated = new Texture(Gdx.files.internal("fishImages/fish2.png"));
+        vomitFish = new Texture(Gdx.files.internal("fishImages/vomitFish.png"));
         vomitFishRotated = new Texture(Gdx.files.internal("fishImages/vomitFish2.png"));
+        anglerFish = new Texture(Gdx.files.internal("fishImages/anglerFish.png"));
+        anglerFishRotated = new Texture(Gdx.files.internal("fishImages/anglerFish2.png"));
+
         moonCatImage = new Texture(Gdx.files.internal("catImages/MoonCat.png"));
         baseCatImage = new Texture(Gdx.files.internal("catImages/BaseCat.png"));
+        mooCatImage = new Texture(Gdx.files.internal("catImages/MooCat.png"));
+        brownCatImage = new Texture(Gdx.files.internal("catImages/BrownCat.png"));
+
         catHolderImage = new Texture(Gdx.files.internal("backgroundElements/catHolder.png"));
         hit = new Texture(Gdx.files.internal("hit.png"));
-
-        catTextures = new Array<>();
-        catTextures.add(baseCatImage);
-        catTextures.add(moonCatImage);
 
         fishTextures = new Array<>();
         fishTextures.add(clownFish);
         fishTextures.add(clownFishRotated);
         fishTextures.add(vomitFish);
         fishTextures.add(vomitFishRotated);
+        fishTextures.add(anglerFish);
+        fishTextures.add(anglerFishRotated);
 
         backgroundSprite =new Sprite(backgroundImage);
         backgroundBridgesSprite = new Sprite(backgroundImageBridges);
@@ -150,9 +172,22 @@ public class Drop extends ApplicationAdapter {
         //USE moonCat CODE FOR MOVING THE CATS WITH MOUSE
 
         // create a Rectangle to logically represent the moonCat
-        baseCat = new Rectangle(catHolderPositions[0].x, catHolderPositions[0].y, Cat.catWidth, Cat.catHeight);
-        moonCat = new Rectangle(catHolderPositions[1].x, catHolderPositions[1].y,  Cat.catWidth, Cat.catHeight);
+        baseCat = new Rectangle(catHolderPositions[0].x, catHolderPositions[0].y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
+        moonCat = new Rectangle(catHolderPositions[1].x, catHolderPositions[1].y,  Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
+        brownCat = new Rectangle(catHolderPositions[2].x, catHolderPositions[2].y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
+        mooCat = new Rectangle(catHolderPositions[3].x, catHolderPositions[3].y,  Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
 
+        //create Cats animations
+        baseCatAnimation = GifDecoder.loadGIFAnimation(Animation.PlayMode.LOOP, Gdx.files.internal("catImages/BaseCat.gif").read());
+        moonCatAnimation = GifDecoder.loadGIFAnimation(Animation.PlayMode.LOOP, Gdx.files.internal("catImages/MoonCat.gif").read());
+        brownCatAnimation = GifDecoder.loadGIFAnimation(Animation.PlayMode.LOOP, Gdx.files.internal("catImages/BrownCat.gif").read());
+        mooCatAnimation = GifDecoder.loadGIFAnimation(Animation.PlayMode.LOOP, Gdx.files.internal("catImages/MooCat.gif").read());
+
+        catAnimations = new Array<>();
+        catAnimations.add(baseCatAnimation);
+        catAnimations.add(moonCatAnimation);
+        catAnimations.add(brownCatAnimation);
+        catAnimations.add(mooCatAnimation);
 
         // create the fishs array and spawn the first fish
         allFish = new Array<Fish>();
@@ -162,15 +197,15 @@ public class Drop extends ApplicationAdapter {
     }
 
     private void spawnFish() {
-
-        if(countFish % 5 == 0){
-            Fish vomitfish = new VomitFish(0, new Rectangle(points[0].x,points[0].y,32,32));
-            allFish.add(vomitfish);
+        Fish fish;
+        if(countFish % 15 == 0){
+            fish = new AnglerFish(0, new Rectangle(points[0].x,points[0].y,32,32));
+        }else if(countFish % 5 == 0){
+            fish = new VomitFish(0, new Rectangle(points[0].x,points[0].y,32,32));
         }else{
-            Fish clownfish = new ClownFish(0, new Rectangle(points[0].x,points[0].y,32,32));
-            allFish.add(clownfish);
+            fish = new ClownFish(0, new Rectangle(points[0].x,points[0].y,32,32));
         }
-
+        allFish.add(fish);
         lastDropTime = TimeUtils.nanoTime();
         countFish++;
     }
@@ -192,16 +227,31 @@ public class Drop extends ApplicationAdapter {
                         new Rectangle(screenX - 32, screenY - 32, 64, 64));
                 allCats.add(moonCat);
                 break;
+            case 2:
+                Cat brownCat = new BrownCat(new Rectangle(screenX - 64, screenY - 64, 128, 128),
+                        new Rectangle(screenX - 32, screenY - 32, 64, 64));
+                allCats.add(brownCat);
+                break;
+            case 3:
+                Cat mooCat = new MooCat(new Rectangle(screenX - 64, screenY - 64, 128, 128),
+                        new Rectangle(screenX - 32, screenY - 32, 64, 64));
+                allCats.add(mooCat);
+                break;
             default:
                 System.out.println("No cats found");
         }
+        timeElapsed.add(0f);
     }
 
     private int checkWhichCat(Rectangle rectangle){
-        if(rectangle.overlaps(new Rectangle(catHolderPositions[0].x,catHolderPositions[0].y,Cat.catWidth,Cat.catHeight))){
+        if(rectangle.overlaps(new Rectangle(catHolderPositions[0].x,catHolderPositions[0].y,Cat.CAT_WIDTH,Cat.CAT_HEIGHT))){
             return 0;
-        }else if(rectangle.overlaps(new Rectangle(catHolderPositions[1].x,catHolderPositions[1].y,Cat.catWidth,Cat.catHeight))){
+        }else if(rectangle.overlaps(new Rectangle(catHolderPositions[1].x,catHolderPositions[1].y,Cat.CAT_WIDTH,Cat.CAT_HEIGHT))){
             return 1;
+        }else if(rectangle.overlaps(new Rectangle(catHolderPositions[2].x,catHolderPositions[2].y,Cat.CAT_WIDTH,Cat.CAT_HEIGHT))){
+            return 2;
+        }else if(rectangle.overlaps(new Rectangle(catHolderPositions[3].x,catHolderPositions[3].y,Cat.CAT_WIDTH,Cat.CAT_HEIGHT))){
+            return 3;
         }
         return -1;
     }
@@ -209,13 +259,26 @@ public class Drop extends ApplicationAdapter {
     private int getCatCost(int catID){
         switch (catID) {
             case 0:
-                return 100;
+                return BaseCat.COST;
             case 1:
-                return 250;
+                return MoonCat.COST;
+            case 2:
+                return BrownCat.COST;
+            case 3:
+                return MooCat.COST;
             default:
                 System.out.println("No cats found");
         }
         return -1;
+    }
+
+    private Cat findCat(Vector3 touchPos){
+        for(int i=0; i<allCats.size; i++){
+            if(new Rectangle(touchPos.x, touchPos.y, 0,0).overlaps(allCats.get(i).getBody())){
+                return allCats.get(i);
+            }
+        }
+        return null;
     }
 
     @Override
@@ -242,12 +305,12 @@ public class Drop extends ApplicationAdapter {
         batch.draw(backgroundImage, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
         //Fish
-        for(Fish fish: allFish) {
-            if(fish.isDirectionLeft()){
+        for (Fish fish : allFish) {
+            if (fish.isDirectionLeft()) {
                 batch.draw(fishTextures.get(fish.getTextureID()), fish.getRectangle().x, fish.getRectangle().y, fish.getFishWidth(), fish.getFishHeight());
 
-            }else{
-                batch.draw(fishTextures.get(fish.getTextureID()+1), fish.getRectangle().x, fish.getRectangle().y, fish.getFishWidth(), fish.getFishHeight());
+            } else {
+                batch.draw(fishTextures.get(fish.getTextureID() + 1), fish.getRectangle().x, fish.getRectangle().y, fish.getFishWidth(), fish.getFishHeight());
             }
         }
 
@@ -255,12 +318,11 @@ public class Drop extends ApplicationAdapter {
         backgroundBridgesSprite.draw(batch);
         batch.draw(backgroundBridgesSprite, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        //Cats
-        if(Gdx.input.isButtonPressed(Input.Buttons.LEFT)){
 
-        }
-        for(int i = 0; i< allCats.size; i++){
-            batch.draw(catTextures.get(allCats.get(i).getTextureID()), allCats.get(i).getBody().x, allCats.get(i).getBody().y, Cat.catWidth, Cat.catHeight);
+        //Cats
+        for (int i = 0; i < allCats.size; i++) {
+            timeElapsed.set(i, timeElapsed.get(i) + Gdx.graphics.getDeltaTime());
+            batch.draw((TextureRegion) catAnimations.get(allCats.get(i).getTextureID()).getKeyFrame(timeElapsed.get(i)), allCats.get(i).getBody().x, allCats.get(i).getBody().y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
         }
 
         //Cat Holder
@@ -269,21 +331,23 @@ public class Drop extends ApplicationAdapter {
         //Gold
         GlyphLayout glyphLayout = new GlyphLayout();
         String goldValue = gold + "";
-        glyphLayout.setText(font,goldValue);
+        glyphLayout.setText(font, goldValue);
         float m = glyphLayout.width;
         font.draw(batch, goldValue, 755 - m, 460);
 
         //World health
         String healthValue = "HP: " + health;
-        glyphLayout.setText(font,healthValue);
+        glyphLayout.setText(font, healthValue);
         float w = glyphLayout.width;
         font.draw(batch, healthValue, 20, 460);
 
         //Cats inside holder (dummys)
-        batch.draw(moonCatImage, moonCat.x, moonCat.y, Cat.catWidth, Cat.catHeight);
-        batch.draw(baseCatImage, baseCat.x, baseCat.y, Cat.catWidth ,Cat.catHeight);
+        batch.draw(moonCatImage, moonCat.x, moonCat.y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
+        batch.draw(baseCatImage, baseCat.x, baseCat.y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
+        batch.draw(brownCatImage, brownCat.x, brownCat.y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
+        batch.draw(mooCatImage, mooCat.x, mooCat.y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
         batch.end();
-
+        /*
         //RENDER THE HITBOX OF THE RIVER WHICH IS USED FOR DISALLOWING THE PLACEMENT OF CATS ON IT
         ShapeRenderer shapeRenderer;
         shapeRenderer = new ShapeRenderer();
@@ -299,17 +363,17 @@ public class Drop extends ApplicationAdapter {
             }
         }
         shapeRenderer.rect(catHolder.x, catHolder.y, catHolder.width, catHolder.height);
-        shapeRenderer.end();
+        shapeRenderer.end();*/
 
         // process user input
-        if(Gdx.input.isButtonPressed(Input.Buttons.LEFT)){
-            Vector3 touchPos = new Vector3(Gdx.input.getX(),Gdx.input.getY(),0);
+        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+            Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
             camera.unproject(touchPos);
-            Rectangle rectangle = new Rectangle(touchPos.x, touchPos.y, 0,0);
+            Rectangle rectangle = new Rectangle(touchPos.x, touchPos.y, 0, 0);
 
             int checkWhichCat = checkWhichCat(rectangle);
 
-            if(checkWhichCat != -1 && !isMoving) {
+            if (checkWhichCat != -1 && !isMoving) {
                 Gdx.input.setInputProcessor(new InputProcessor() {
                     @Override
                     public boolean keyDown(int keycode) {
@@ -350,10 +414,11 @@ public class Drop extends ApplicationAdapter {
                                 break;
                             }
                         }
-                        if(catPosition.overlaps(catHolder)){
+                        if (catPosition.overlaps(catHolder)) {
                             helpOverlaps = false;
                         }
 
+                        //figure out a way to make getCatCost a part of Cat class
                         //If the cats DONT overlap with the river OR any other cats AND the gold amount is above CAT_COST you can spawn the cat
                         if (helpOverlaps && gold >= getCatCost(checkWhichCat)) {
                             gold -= getCatCost(checkWhichCat);
@@ -368,6 +433,14 @@ public class Drop extends ApplicationAdapter {
                             case 1:
                                 moonCat.x = catHolderPositions[1].x;
                                 moonCat.y = catHolderPositions[1].y;
+                                break;
+                            case 2:
+                                brownCat.x = catHolderPositions[2].x;
+                                brownCat.y = catHolderPositions[2].y;
+                                break;
+                            case 3:
+                                mooCat.x = catHolderPositions[3].x;
+                                mooCat.y = catHolderPositions[3].y;
                                 break;
                             default:
                                 System.out.println("No cats found");
@@ -385,12 +458,20 @@ public class Drop extends ApplicationAdapter {
 
                         switch (checkWhichCat) {
                             case 0:
-                                baseCat.x = touchPos.x - Cat.catWidth  / 2;
-                                baseCat.y = touchPos.y - Cat.catHeight / 2;
+                                baseCat.x = touchPos.x - Cat.CAT_WIDTH / 2;
+                                baseCat.y = touchPos.y - Cat.CAT_HEIGHT / 2;
                                 break;
                             case 1:
-                                moonCat.x = touchPos.x - Cat.catWidth  / 2;
-                                moonCat.y = touchPos.y - Cat.catHeight / 2;
+                                moonCat.x = touchPos.x - Cat.CAT_WIDTH / 2;
+                                moonCat.y = touchPos.y - Cat.CAT_HEIGHT / 2;
+                                break;
+                            case 2:
+                                brownCat.x = touchPos.x - Cat.CAT_WIDTH / 2;
+                                brownCat.y = touchPos.y - Cat.CAT_HEIGHT / 2;
+                                break;
+                            case 3:
+                                mooCat.x = touchPos.x - Cat.CAT_WIDTH / 2;
+                                mooCat.y = touchPos.y - Cat.CAT_HEIGHT / 2;
                                 break;
                             default:
                                 System.out.println("No cats found");
@@ -409,72 +490,77 @@ public class Drop extends ApplicationAdapter {
                     }
                 });
             }
-        }else{
+        } else {
             Gdx.input.setInputProcessor(null);
         }
 
         // make sure the moonCat stays within the screen bounds
-        if(moonCat.x < 0) moonCat.x = 0;
-        if(moonCat.x > 800 - 32) moonCat.x = 800 - 32;
+        if (moonCat.x < 0) moonCat.x = 0;
+        if (moonCat.x > 800 - 32) moonCat.x = 800 - 32;
 
         // check if we need to create a new fish
-        if(TimeUtils.nanoTime() - lastDropTime > speed) spawnFish();
+        if (TimeUtils.nanoTime() - lastDropTime > speed) spawnFish();
         speed *= 0.9995;
         // move the fishs, remove any that are beneath the bottom edge of
         // the screen or that hit the moonCat. In the latter case we play back
         // a sound effect as well.
         for (Iterator<Fish> iter = allFish.iterator(); iter.hasNext(); ) {
             Fish fish = iter.next();
-
-            if(fish.getRectangle().overlaps(points[fish.getCurrentPoint()]) && fish.getCurrentPoint() != points.length-1){
+            if (fish.getRectangle().overlaps(points[fish.getCurrentPoint()]) && fish.getCurrentPoint() != points.length - 1) {
                 fish.setCurrentPoint(fish.getCurrentPoint() + 1);
             }
 
-            if(points[fish.getCurrentPoint()].x < fish.getRectangle().x){
+            if (points[fish.getCurrentPoint()].x < fish.getRectangle().x) {
                 fish.getRectangle().x -= 100 * Gdx.graphics.getDeltaTime();
                 fish.setDirectionLeft(true);
             }
-            if(points[fish.getCurrentPoint()].x > fish.getRectangle().x){
+            if (points[fish.getCurrentPoint()].x > fish.getRectangle().x) {
                 fish.getRectangle().x += 100 * Gdx.graphics.getDeltaTime();
                 fish.setDirectionLeft(false);
             }
 
-            if(points[fish.getCurrentPoint()].y < fish.getRectangle().y) {
+            if (points[fish.getCurrentPoint()].y < fish.getRectangle().y) {
                 fish.getRectangle().y -= 100 * Gdx.graphics.getDeltaTime();
             }
-            if(points[fish.getCurrentPoint()].y > fish.getRectangle().y){
+            if (points[fish.getCurrentPoint()].y > fish.getRectangle().y) {
                 fish.getRectangle().y += 100 * Gdx.graphics.getDeltaTime();
             }
 
-            if(fish.getRectangle().y < 0){
+            if (fish.getRectangle().y < 0) {
                 health -= fish.getDamage();
                 iter.remove();
             }
 
-            for(int i = 0; i< allCats.size; i++){
-            if(TimeUtils.timeSinceMillis(allCats.get(i).getCurrentInterval()) >= allCats.get(i).getAttackInterval()) {
-                    if (allCats.get(i).getRange().overlaps(fish.getRectangle())) {
-                        batch.begin();
-                        batch.draw(hit, fish.getRectangle().x, fish.getRectangle().y, fish.getFishWidth(), fish.getFishHeight());
-                        batch.end();
-                        fish.setHealth(fish.getHealth() - allCats.get(i).getDamage());
-                        allCats.get(i).setCurrentInterval(TimeUtils.millis());
-                    }
-                }
-            }
-
-            //use libgdx Timer and Task for this
-            if(fish.getHealth() <= 0){
+            if (fish.getHealth() <= 0) {
                 iter.remove();
                 gold += fish.getGoldDrop();
             }
 
-            if(health <= 0){
+            if (health <= 0) {
                 Gdx.app.exit();
             }
         }
-    }
 
+        for (Iterator<Cat> iter = allCats.iterator(); iter.hasNext(); ) {
+            Cat cat = iter.next();
+            if (TimeUtils.timeSinceMillis(cat.getCurrentInterval()) >= cat.getAttackInterval()) {
+                int counter = 0;
+                for(int i=0; i< allFish.size; i++){
+                        if (cat.getRange().overlaps(allFish.get(i).getRectangle())) {
+                            batch.begin();
+                            batch.draw(hit, allFish.get(i).getRectangle().x, allFish.get(i).getRectangle().y, allFish.get(i).getFishWidth(), allFish.get(i).getFishHeight());
+                            batch.end();
+                            allFish.get(i).setHealth(allFish.get(i).getHealth() - cat.getDamage());
+                            cat.setCurrentInterval(TimeUtils.millis());
+                            counter++;
+                        }
+                    if(counter == cat.getAoeAmount()){
+                        break;
+                    }
+                }
+            }
+        }
+    }
     @Override
     public void dispose() {
         // dispose of all the native resources
