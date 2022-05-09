@@ -30,9 +30,7 @@ public class Fish {
         this.fishHeight = fishHeight;
     }
 
-    public int getDamage() {
-        return damage;
-    }
+    public int getDamage() { return damage; }
 
     public float getFishWidth() {
         return fishWidth;
