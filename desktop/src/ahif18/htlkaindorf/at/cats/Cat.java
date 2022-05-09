@@ -6,18 +6,16 @@ public class Cat {
     public static float CAT_WIDTH = 75;
     public static float CAT_HEIGHT = 75;
 
+    public static float CAT_BODY_WIDTH = 64;
+    public static float CAT_BODY_HEIGHT = 64;
+
     private Rectangle range;
     private Rectangle body;
     private int damage;
     private float attackInterval;
     private long currentInterval = 0;
     private int textureID;
-
     private int aoeAmount;
-
-    //implement different hitboxes (range)
-    //Implement AOE attack and AOE attack amount (how many fish are hit by one AOE attack) and ifAOE boolean
-
 
     public Cat(Rectangle range, Rectangle body, int damage, float attackInterval, int textureID, int aoeAmount) {
         this.range = range;

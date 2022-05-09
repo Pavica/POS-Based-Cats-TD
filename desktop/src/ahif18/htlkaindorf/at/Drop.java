@@ -13,9 +13,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
@@ -53,6 +55,7 @@ public class Drop extends ApplicationAdapter {
     private Sprite catHolderSprite;
 
     private SpriteBatch batch;
+    private ShapeRenderer shapeRenderer;
 
     private BitmapFont font;
 
@@ -70,6 +73,10 @@ public class Drop extends ApplicationAdapter {
 
     private Rectangle mooCat;
     Animation<TextureRegion> mooCatAnimation;
+
+    private boolean catIsClicked = false;
+    private Rectangle helpCatRectangleRange;
+    private Rectangle helpCatRectangleBody;
 
     private Rectangle catHolder;
     private Array<Animation> catAnimations;
@@ -218,23 +225,19 @@ public class Drop extends ApplicationAdapter {
 
         switch (catID) {
             case 0:
-                Cat basecat = new BaseCat(new Rectangle(screenX - 64, screenY - 64, 128, 128),
-                        new Rectangle(screenX - 32, screenY - 32, 64, 64));
-                allCats.add(basecat);
+                Cat baseCat = new BaseCat(screenX, screenY);
+                allCats.add(baseCat);
                 break;
             case 1:
-                Cat moonCat = new MoonCat(new Rectangle(screenX - 64, screenY - 64, 128, 128),
-                        new Rectangle(screenX - 32, screenY - 32, 64, 64));
+                Cat moonCat = new MoonCat(screenX, screenY);
                 allCats.add(moonCat);
                 break;
             case 2:
-                Cat brownCat = new BrownCat(new Rectangle(screenX - 64, screenY - 64, 128, 128),
-                        new Rectangle(screenX - 32, screenY - 32, 64, 64));
+                Cat brownCat = new BrownCat(screenX, screenY);
                 allCats.add(brownCat);
                 break;
             case 3:
-                Cat mooCat = new MooCat(new Rectangle(screenX - 64, screenY - 64, 128, 128),
-                        new Rectangle(screenX - 32, screenY - 32, 64, 64));
+                Cat mooCat = new MooCat(screenX, screenY);
                 allCats.add(mooCat);
                 break;
             default:
@@ -273,6 +276,7 @@ public class Drop extends ApplicationAdapter {
     }
 
     private Cat findCat(Vector3 touchPos){
+        camera.unproject(touchPos);
         for(int i=0; i<allCats.size; i++){
             if(new Rectangle(touchPos.x, touchPos.y, 0,0).overlaps(allCats.get(i).getBody())){
                 return allCats.get(i);
@@ -347,9 +351,34 @@ public class Drop extends ApplicationAdapter {
         batch.draw(brownCatImage, brownCat.x, brownCat.y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
         batch.draw(mooCatImage, mooCat.x, mooCat.y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
         batch.end();
+
+        if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)){
+            Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+            Cat cat = findCat(touchPos);
+            if(cat!= null){
+                catIsClicked = true;
+                helpCatRectangleRange = cat.getRange();
+                helpCatRectangleBody = cat.getBody();
+            }else{
+                catIsClicked = false;
+            }
+        }
+
+        if(catIsClicked){
+            shapeRenderer = new ShapeRenderer();
+            Gdx.gl.glEnable(GL20.GL_BLEND);
+            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+            shapeRenderer.setProjectionMatrix(camera.combined);
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            shapeRenderer.setColor(Color.DARK_GRAY.r,Color.DARK_GRAY.g,Color.DARK_GRAY.b, 0.5f);
+            shapeRenderer.rect(helpCatRectangleRange.x, helpCatRectangleRange.y, helpCatRectangleRange.width, helpCatRectangleRange.height);
+            shapeRenderer.rect(helpCatRectangleBody.x, helpCatRectangleBody.y, helpCatRectangleBody.width, helpCatRectangleBody.height);
+            shapeRenderer.end();
+            Gdx.gl.glDisable(GL20.GL_BLEND);
+        }
+
         /*
         //RENDER THE HITBOX OF THE RIVER WHICH IS USED FOR DISALLOWING THE PLACEMENT OF CATS ON IT
-        ShapeRenderer shapeRenderer;
         shapeRenderer = new ShapeRenderer();
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
