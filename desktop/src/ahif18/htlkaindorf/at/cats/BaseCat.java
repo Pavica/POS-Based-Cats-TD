@@ -14,6 +14,6 @@ public class BaseCat extends Cat{
             100,
             500,
             0,
-            0);
+            1);
     }
 }
