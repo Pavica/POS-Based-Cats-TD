@@ -3,8 +3,8 @@ package ahif18.htlkaindorf.at.cats;
 import com.badlogic.gdx.math.Rectangle;
 
 public class Cat {
-    public static float catWidth = 75;
-    public static float catHeight = 75;
+    public static float CAT_WIDTH = 75;
+    public static float CAT_HEIGHT = 75;
 
     private Rectangle range;
     private Rectangle body;
@@ -12,15 +12,24 @@ public class Cat {
     private float attackInterval;
     private long currentInterval = 0;
     private int textureID;
-    //implement different hitboxes
+
+    private int aoeAmount;
+
+    //implement different hitboxes (range)
     //Implement AOE attack and AOE attack amount (how many fish are hit by one AOE attack) and ifAOE boolean
 
-    public Cat(Rectangle range, Rectangle body, int damage, float attackInterval, int textureID) {
+
+    public Cat(Rectangle range, Rectangle body, int damage, float attackInterval, int textureID, int aoeAmount) {
         this.range = range;
         this.body = body;
         this.damage = damage;
         this.attackInterval = attackInterval;
         this.textureID = textureID;
+        this.aoeAmount = aoeAmount;
+    }
+
+    public int getAoeAmount() {
+        return aoeAmount;
     }
 
     public Rectangle getBody() {
