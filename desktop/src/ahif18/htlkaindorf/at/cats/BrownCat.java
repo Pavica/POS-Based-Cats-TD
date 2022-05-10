@@ -10,8 +10,8 @@ public class BrownCat extends Cat{
     public BrownCat(float x, float y) {
         super(new Rectangle(x - RANGE_WIDTH/2,y - RANGE_HEIGHT/2,RANGE_WIDTH,RANGE_HEIGHT),
                 new Rectangle(x- CAT_BODY_WIDTH/2,y - CAT_BODY_HEIGHT/2,CAT_BODY_WIDTH,CAT_BODY_HEIGHT),
-                400,
-                3000,
+                500,
+                2500,
                 2,
                 5);
     }

@@ -49,6 +49,7 @@ public class Drop extends ApplicationAdapter {
 
     private Texture catHolderImage;
     private Texture hit;
+    private Texture x;
 
     private Sprite backgroundSprite;
     private Sprite backgroundBridgesSprite;
@@ -61,7 +62,8 @@ public class Drop extends ApplicationAdapter {
 
     private OrthographicCamera camera;
 
-    private Array<Float> timeElapsed = new Array<>();
+    private Array<Float> timeElapsed;
+    private Array<Rectangle> catTypes;
     private Rectangle moonCat;
     Animation<TextureRegion> moonCatAnimation;
 
@@ -84,7 +86,9 @@ public class Drop extends ApplicationAdapter {
     private Array<Cat> allCats;
     private Array<Fish> allFish;
     private long lastDropTime;
+
     private boolean isMoving = false;
+    private Vector3 touchPosIsMoving;
 
     //0, 2, 3, 1
     private Vector3 catHolderPositions[] = {
@@ -146,6 +150,7 @@ public class Drop extends ApplicationAdapter {
 
         catHolderImage = new Texture(Gdx.files.internal("backgroundElements/catHolder.png"));
         hit = new Texture(Gdx.files.internal("hit.png"));
+        x = new Texture(Gdx.files.internal("x.png"));
 
         fishTextures = new Array<>();
         fishTextures.add(clownFish);
@@ -161,7 +166,7 @@ public class Drop extends ApplicationAdapter {
 
         catHolder = new Rectangle(630,240,34*5, 48*5);
 
-        font = FontGenerator.generateFreetypeFont(16, Color.WHITE);
+        font = FontGenerator.generateFreetypeFont(16);
 
         // load the drop sound effect and the rain background "music"
         //dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.wav"));
@@ -184,6 +189,12 @@ public class Drop extends ApplicationAdapter {
         brownCat = new Rectangle(catHolderPositions[2].x, catHolderPositions[2].y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
         mooCat = new Rectangle(catHolderPositions[3].x, catHolderPositions[3].y,  Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
 
+        catTypes = new Array<>();
+        catTypes.add(baseCat);
+        catTypes.add(moonCat);
+        catTypes.add(brownCat);
+        catTypes.add(mooCat);
+
         //create Cats animations
         baseCatAnimation = GifDecoder.loadGIFAnimation(Animation.PlayMode.LOOP, Gdx.files.internal("catImages/BaseCat.gif").read());
         moonCatAnimation = GifDecoder.loadGIFAnimation(Animation.PlayMode.LOOP, Gdx.files.internal("catImages/MoonCat.gif").read());
@@ -191,18 +202,23 @@ public class Drop extends ApplicationAdapter {
         mooCatAnimation = GifDecoder.loadGIFAnimation(Animation.PlayMode.LOOP, Gdx.files.internal("catImages/MooCat.gif").read());
 
         catAnimations = new Array<>();
+        timeElapsed = new Array<>();
         catAnimations.add(baseCatAnimation);
         catAnimations.add(moonCatAnimation);
         catAnimations.add(brownCatAnimation);
         catAnimations.add(mooCatAnimation);
 
+
+
         // create the fishs array and spawn the first fish
-        allFish = new Array<Fish>();
+        allFish = new Array<>();
         spawnFish();
 
-        allCats = new Array<Cat>();
+        allCats = new Array<>();
     }
 
+    //idea for proper fish spawning make two different values the amount of fish COUNT and the type of fish TYPE
+    //intertwine them in some kind of array and make a method that reads it and spawns the fish accordingly
     private void spawnFish() {
         Fish fish;
         if(countFish % 15 == 0){
@@ -247,18 +263,15 @@ public class Drop extends ApplicationAdapter {
     }
 
     private int checkWhichCat(Rectangle rectangle){
-        if(rectangle.overlaps(new Rectangle(catHolderPositions[0].x,catHolderPositions[0].y,Cat.CAT_WIDTH,Cat.CAT_HEIGHT))){
-            return 0;
-        }else if(rectangle.overlaps(new Rectangle(catHolderPositions[1].x,catHolderPositions[1].y,Cat.CAT_WIDTH,Cat.CAT_HEIGHT))){
-            return 1;
-        }else if(rectangle.overlaps(new Rectangle(catHolderPositions[2].x,catHolderPositions[2].y,Cat.CAT_WIDTH,Cat.CAT_HEIGHT))){
-            return 2;
-        }else if(rectangle.overlaps(new Rectangle(catHolderPositions[3].x,catHolderPositions[3].y,Cat.CAT_WIDTH,Cat.CAT_HEIGHT))){
-            return 3;
+        for(int i=0; i<catHolderPositions.length; i++){
+            if(rectangle.overlaps(new Rectangle(catHolderPositions[i].x,catHolderPositions[i].y,Cat.CAT_WIDTH,Cat.CAT_HEIGHT))) {
+                return i;
+            }
         }
         return -1;
     }
 
+    //pls change this its annoying tbh even if you have to place a cat that you cant
     private int getCatCost(int catID){
         switch (catID) {
             case 0:
@@ -283,6 +296,23 @@ public class Drop extends ApplicationAdapter {
             }
         }
         return null;
+    }
+
+    private boolean checkIfOverlaps(Rectangle catPosition){
+        for (Rectangle riverPoint : riverHitbox) {
+            if (catPosition.overlaps(riverPoint)) {
+                return true;
+            }
+        }
+        for (Cat cat : allCats) {
+            if (catPosition.overlaps(cat.getBody())) {
+                return true;
+            }
+        }
+        if (catPosition.overlaps(catHolder)) {
+                return true;
+        }
+        return false;
     }
 
     @Override
@@ -322,7 +352,6 @@ public class Drop extends ApplicationAdapter {
         backgroundBridgesSprite.draw(batch);
         batch.draw(backgroundBridgesSprite, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-
         //Cats
         for (int i = 0; i < allCats.size; i++) {
             timeElapsed.set(i, timeElapsed.get(i) + Gdx.graphics.getDeltaTime());
@@ -340,16 +369,28 @@ public class Drop extends ApplicationAdapter {
         font.draw(batch, goldValue, 755 - m, 460);
 
         //World health
-        String healthValue = "HP: " + health;
-        glyphLayout.setText(font, healthValue);
-        float w = glyphLayout.width;
-        font.draw(batch, healthValue, 20, 460);
+        font.draw(batch, "HP: " + health, 20, 460);
 
         //Cats inside holder (dummys)
         batch.draw(moonCatImage, moonCat.x, moonCat.y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
         batch.draw(baseCatImage, baseCat.x, baseCat.y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
         batch.draw(brownCatImage, brownCat.x, brownCat.y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
         batch.draw(mooCatImage, mooCat.x, mooCat.y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
+
+        //Gold cost for cats
+        for(int i=0; i< catHolderPositions.length; i++){
+            font.setColor(gold < getCatCost(i) ? Color.RED : Color.WHITE);
+            font.draw(batch, getCatCost(i) + "", catHolderPositions[i].x + 25, catHolderPositions[i].y +5 );
+        }
+        font.setColor(Color.WHITE);
+
+        //draw x if cat overlaps an area where you can not place it
+        if(isMoving){
+            Rectangle rect = new Rectangle(touchPosIsMoving.x, touchPosIsMoving.y, 0, 0);
+            if(checkIfOverlaps(rect)){
+                batch.draw(x, rect.x-Cat.CAT_WIDTH/2, rect.y-Cat.CAT_HEIGHT/2, Cat.CAT_BODY_WIDTH, Cat.CAT_BODY_HEIGHT);
+            }
+        }
         batch.end();
 
         if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)){
@@ -376,6 +417,16 @@ public class Drop extends ApplicationAdapter {
             shapeRenderer.end();
             Gdx.gl.glDisable(GL20.GL_BLEND);
         }
+        //remove cat if right click and return half the money used to buy the cat (not including upgrades) temporary method
+        if(Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)){
+            Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+            Cat cat = findCat(touchPos);
+            if(cat!= null){
+                gold += getCatCost(cat.getTextureID())/2;
+                allCats.removeValue(cat, false);
+                catIsClicked = false;
+            }
+        }
 
         /*
         //RENDER THE HITBOX OF THE RIVER WHICH IS USED FOR DISALLOWING THE PLACEMENT OF CATS ON IT
@@ -396,13 +447,14 @@ public class Drop extends ApplicationAdapter {
 
         // process user input
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+            //find a way to put this into buttonDown
             Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
             camera.unproject(touchPos);
             Rectangle rectangle = new Rectangle(touchPos.x, touchPos.y, 0, 0);
 
             int checkWhichCat = checkWhichCat(rectangle);
 
-            if (checkWhichCat != -1 && !isMoving) {
+            if (checkWhichCat != -1 && !isMoving && gold >= getCatCost(checkWhichCat)) {
                 Gdx.input.setInputProcessor(new InputProcessor() {
                     @Override
                     public boolean keyDown(int keycode) {
@@ -430,49 +482,23 @@ public class Drop extends ApplicationAdapter {
                         Vector3 touchPos = new Vector3(screenX, screenY, 0);
                         camera.unproject(touchPos);
                         Rectangle catPosition = new Rectangle(touchPos.x, touchPos.y, 0, 0);
-                        boolean helpOverlaps = true;
-                        for (Rectangle riverPoint : riverHitbox) {
-                            if (catPosition.overlaps(riverPoint)) {
-                                helpOverlaps = false;
-                                break;
-                            }
-                        }
-                        for (Cat cat : allCats) {
-                            if (catPosition.overlaps(cat.getBody())) {
-                                helpOverlaps = false;
-                                break;
-                            }
-                        }
-                        if (catPosition.overlaps(catHolder)) {
-                            helpOverlaps = false;
-                        }
+
+                        boolean helpOverlaps = checkIfOverlaps(catPosition);
+
+                        //try to make it so that you cant move the cats if you dont have enough money
 
                         //figure out a way to make getCatCost a part of Cat class
                         //If the cats DONT overlap with the river OR any other cats AND the gold amount is above CAT_COST you can spawn the cat
-                        if (helpOverlaps && gold >= getCatCost(checkWhichCat)) {
+                        if (!helpOverlaps && gold >= getCatCost(checkWhichCat)) {
                             gold -= getCatCost(checkWhichCat);
                             spawnCat(touchPos.x, touchPos.y, checkWhichCat);
                         }
-
-                        switch (checkWhichCat) {
-                            case 0:
-                                baseCat.x = catHolderPositions[0].x;
-                                baseCat.y = catHolderPositions[0].y;
+                        for(int i=0; i<catTypes.size; i++){
+                            if(checkWhichCat == i){
+                                catTypes.get(i).x = catHolderPositions[i].x;
+                                catTypes.get(i).y = catHolderPositions[i].y;
                                 break;
-                            case 1:
-                                moonCat.x = catHolderPositions[1].x;
-                                moonCat.y = catHolderPositions[1].y;
-                                break;
-                            case 2:
-                                brownCat.x = catHolderPositions[2].x;
-                                brownCat.y = catHolderPositions[2].y;
-                                break;
-                            case 3:
-                                mooCat.x = catHolderPositions[3].x;
-                                mooCat.y = catHolderPositions[3].y;
-                                break;
-                            default:
-                                System.out.println("No cats found");
+                            }
                         }
                         return false;
                     }
@@ -482,28 +508,18 @@ public class Drop extends ApplicationAdapter {
                         isMoving = true;
                         Vector3 touchPos = new Vector3(screenX, screenX, 0);
                         camera.unproject(touchPos);
+
+                        touchPosIsMoving = touchPos;
+
                         touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
                         camera.unproject(touchPos);
 
-                        switch (checkWhichCat) {
-                            case 0:
-                                baseCat.x = touchPos.x - Cat.CAT_WIDTH / 2;
-                                baseCat.y = touchPos.y - Cat.CAT_HEIGHT / 2;
+                        for(int i=0; i<catTypes.size; i++){
+                            if(checkWhichCat == i){
+                                catTypes.get(i).x = touchPos.x - Cat.CAT_WIDTH / 2;
+                                catTypes.get(i).y = touchPos.y - Cat.CAT_HEIGHT / 2;
                                 break;
-                            case 1:
-                                moonCat.x = touchPos.x - Cat.CAT_WIDTH / 2;
-                                moonCat.y = touchPos.y - Cat.CAT_HEIGHT / 2;
-                                break;
-                            case 2:
-                                brownCat.x = touchPos.x - Cat.CAT_WIDTH / 2;
-                                brownCat.y = touchPos.y - Cat.CAT_HEIGHT / 2;
-                                break;
-                            case 3:
-                                mooCat.x = touchPos.x - Cat.CAT_WIDTH / 2;
-                                mooCat.y = touchPos.y - Cat.CAT_HEIGHT / 2;
-                                break;
-                            default:
-                                System.out.println("No cats found");
+                            }
                         }
                         return false;
                     }
@@ -529,7 +545,7 @@ public class Drop extends ApplicationAdapter {
 
         // check if we need to create a new fish
         if (TimeUtils.nanoTime() - lastDropTime > speed) spawnFish();
-        speed *= 0.9995;
+        speed *= 0.9999;
         // move the fishs, remove any that are beneath the bottom edge of
         // the screen or that hit the moonCat. In the latter case we play back
         // a sound effect as well.
@@ -540,19 +556,19 @@ public class Drop extends ApplicationAdapter {
             }
 
             if (points[fish.getCurrentPoint()].x < fish.getRectangle().x) {
-                fish.getRectangle().x -= 100 * Gdx.graphics.getDeltaTime();
+                fish.getRectangle().x -= fish.getSpeed() * Gdx.graphics.getDeltaTime();
                 fish.setDirectionLeft(true);
             }
             if (points[fish.getCurrentPoint()].x > fish.getRectangle().x) {
-                fish.getRectangle().x += 100 * Gdx.graphics.getDeltaTime();
+                fish.getRectangle().x += fish.getSpeed() * Gdx.graphics.getDeltaTime();
                 fish.setDirectionLeft(false);
             }
 
             if (points[fish.getCurrentPoint()].y < fish.getRectangle().y) {
-                fish.getRectangle().y -= 100 * Gdx.graphics.getDeltaTime();
+                fish.getRectangle().y -= fish.getSpeed() * Gdx.graphics.getDeltaTime();
             }
             if (points[fish.getCurrentPoint()].y > fish.getRectangle().y) {
-                fish.getRectangle().y += 100 * Gdx.graphics.getDeltaTime();
+                fish.getRectangle().y += fish.getSpeed() * Gdx.graphics.getDeltaTime();
             }
 
             if (fish.getRectangle().y < 0) {
@@ -576,6 +592,7 @@ public class Drop extends ApplicationAdapter {
                 int counter = 0;
                 for(int i=0; i< allFish.size; i++){
                         if (cat.getRange().overlaps(allFish.get(i).getRectangle())) {
+                            //temporary hit visualisation
                             batch.begin();
                             batch.draw(hit, allFish.get(i).getRectangle().x, allFish.get(i).getRectangle().y, allFish.get(i).getFishWidth(), allFish.get(i).getFishHeight());
                             batch.end();

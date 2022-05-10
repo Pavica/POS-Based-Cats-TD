@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 public class FontGenerator {
     private static FreeTypeFontGenerator fontGenerator;
 
-    public static BitmapFont generateFreetypeFont(int fontSize, Color color)
+    public static BitmapFont generateFreetypeFont(int fontSize)
     {
         if(fontGenerator == null){
             fontGenerator = new FreeTypeFontGenerator(Gdx.files.internal("Swansea-q3pd.ttf"));

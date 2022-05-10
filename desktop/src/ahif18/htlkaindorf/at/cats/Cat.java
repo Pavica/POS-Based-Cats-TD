@@ -1,11 +1,9 @@
 package ahif18.htlkaindorf.at.cats;
 
 import com.badlogic.gdx.math.Rectangle;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
-@AllArgsConstructor
 public class Cat {
     public static float CAT_WIDTH = 75;
     public static float CAT_HEIGHT = 75;
