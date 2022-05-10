@@ -91,14 +91,14 @@ public class Drop extends ApplicationAdapter {
     private Vector3 touchPosIsMoving;
 
     //0, 2, 3, 1
-    private Vector3 catHolderPositions[] = {
+    private final Vector3[] catHolderPositions = {
             new Vector3(645, 345,0),
             new Vector3(715,265,0),
             new Vector3(715,345,0),
             new Vector3(645, 265,0),
     };
 
-    private Rectangle points[] = {
+    private final Rectangle[] points = {
         new Rectangle(515,470,8,8),
         new Rectangle(515, 360, 8,8),
         new Rectangle(70,360, 8,8),
@@ -115,7 +115,7 @@ public class Drop extends ApplicationAdapter {
 
     //draw these so you can check if they align with the river and then use it as a hitbox for not allowing it to place
     //BEFORE THAT CHECK IF YOU COULD DO IT WITH THE FIRST ONE
-    private Rectangle riverHitbox[] = {
+    private final Rectangle[] riverHitbox = {
             new Rectangle(points[0].x -10,points[0].y - 10,60,50),
             new Rectangle(points[1].x - 10,points[1].y - 10, 60,150),
             new Rectangle(points[2].x - 10,points[2].y - 10, 450,60),
@@ -131,7 +131,6 @@ public class Drop extends ApplicationAdapter {
 
     @Override
     public void create() {
-
         // load the images for the droplet and the moonCat, 32x32 pixels each
         backgroundImage = new Texture(Gdx.files.internal("backgroundElements/background.png"));
         backgroundImageBridges = new Texture(Gdx.files.internal("backgroundElements/background-2.png"));
@@ -506,13 +505,10 @@ public class Drop extends ApplicationAdapter {
                     @Override
                     public boolean touchDragged(int screenX, int screenY, int pointer) {
                         isMoving = true;
-                        Vector3 touchPos = new Vector3(screenX, screenX, 0);
+                        Vector3 touchPos = new Vector3(screenX, screenY, 0);
                         camera.unproject(touchPos);
 
                         touchPosIsMoving = touchPos;
-
-                        touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-                        camera.unproject(touchPos);
 
                         for(int i=0; i<catTypes.size; i++){
                             if(checkWhichCat == i){
@@ -586,21 +582,20 @@ public class Drop extends ApplicationAdapter {
             }
         }
 
-        for (Iterator<Cat> iter = allCats.iterator(); iter.hasNext(); ) {
-            Cat cat = iter.next();
+        for (Cat cat : allCats) {
             if (TimeUtils.timeSinceMillis(cat.getCurrentInterval()) >= cat.getAttackInterval()) {
                 int counter = 0;
-                for(int i=0; i< allFish.size; i++){
-                        if (cat.getRange().overlaps(allFish.get(i).getRectangle())) {
-                            //temporary hit visualisation
-                            batch.begin();
-                            batch.draw(hit, allFish.get(i).getRectangle().x, allFish.get(i).getRectangle().y, allFish.get(i).getFishWidth(), allFish.get(i).getFishHeight());
-                            batch.end();
-                            allFish.get(i).setHealth(allFish.get(i).getHealth() - cat.getDamage());
-                            cat.setCurrentInterval(TimeUtils.millis());
-                            counter++;
-                        }
-                    if(counter == cat.getAoeAmount()){
+                for (int i = 0; i < allFish.size; i++) {
+                    if (cat.getRange().overlaps(allFish.get(i).getRectangle())) {
+                        //temporary hit visualisation
+                        batch.begin();
+                        batch.draw(hit, allFish.get(i).getRectangle().x, allFish.get(i).getRectangle().y, allFish.get(i).getFishWidth(), allFish.get(i).getFishHeight());
+                        batch.end();
+                        allFish.get(i).setHealth(allFish.get(i).getHealth() - cat.getDamage());
+                        cat.setCurrentInterval(TimeUtils.millis());
+                        counter++;
+                    }
+                    if (counter == cat.getAoeAmount()) {
                         break;
                     }
                 }
@@ -614,7 +609,16 @@ public class Drop extends ApplicationAdapter {
         clownFishRotated.dispose();
         vomitFish.dispose();
         vomitFishRotated.dispose();
+        anglerFish.dispose();
+        anglerFishRotated.dispose();
         backgroundImage.dispose();
-        batch.dispose();
+        backgroundImageBridges.dispose();
+        baseCatImage.dispose();
+        moonCatImage.dispose();
+        brownCatImage.dispose();
+        mooCatImage.dispose();
+        catHolderImage.dispose();
+        hit.dispose();
+        x.dispose();
     }
 }
