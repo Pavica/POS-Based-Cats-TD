@@ -26,7 +26,7 @@ import com.badlogic.gdx.utils.TimeUtils;
 
 public class Drop extends ApplicationAdapter {
     private static final int MAX_HEALTH = 100;
-    private static final int GAME_SPEED = 10;
+    private static final int GAME_SPEED = 1;
 
     private int gold = 1000;
     private int speed = 1000000000;
