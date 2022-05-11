@@ -26,6 +26,7 @@ import com.badlogic.gdx.utils.TimeUtils;
 
 public class Drop extends ApplicationAdapter {
     private static final int MAX_HEALTH = 100;
+    private static final int GAME_SPEED = 1;
 
     private int gold = 1000;
     private int speed = 1000000000;
@@ -63,17 +64,17 @@ public class Drop extends ApplicationAdapter {
     private OrthographicCamera camera;
 
     private Array<Float> timeElapsed;
-    private Array<Rectangle> catTypes;
-    private Rectangle moonCat;
+    private Array<Cat> catTypes;
+    private MoonCat moonCat;
     Animation<TextureRegion> moonCatAnimation;
 
-    private Rectangle baseCat;
+    private BaseCat baseCat;
     Animation<TextureRegion> baseCatAnimation;
 
-    private Rectangle brownCat;
+    private BrownCat brownCat;
     Animation<TextureRegion> brownCatAnimation;
 
-    private Rectangle mooCat;
+    private MooCat mooCat;
     Animation<TextureRegion> mooCatAnimation;
 
     private boolean catIsClicked = false;
@@ -92,10 +93,10 @@ public class Drop extends ApplicationAdapter {
 
     //0, 2, 3, 1
     private final Vector3[] catHolderPositions = {
-            new Vector3(645, 345,0),
-            new Vector3(715,265,0),
-            new Vector3(715,345,0),
-            new Vector3(645, 265,0),
+            new Vector3(677, 377,0),
+            new Vector3(747,297,0),
+            new Vector3(747,377,0),
+            new Vector3(677, 297,0),
     };
 
     private final Rectangle[] points = {
@@ -128,6 +129,10 @@ public class Drop extends ApplicationAdapter {
             new Rectangle(points[10].x - 10,points[10].y - 10, 70,60),
             new Rectangle(points[11].x - 10,points[11].y - 10, 60,100)
     };
+
+    private float myDeltaTime(){
+        return Gdx.graphics.getDeltaTime() * GAME_SPEED;
+    }
 
     @Override
     public void create() {
@@ -183,10 +188,10 @@ public class Drop extends ApplicationAdapter {
         //USE moonCat CODE FOR MOVING THE CATS WITH MOUSE
 
         // create a Rectangle to logically represent the moonCat
-        baseCat = new Rectangle(catHolderPositions[0].x, catHolderPositions[0].y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
-        moonCat = new Rectangle(catHolderPositions[1].x, catHolderPositions[1].y,  Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
-        brownCat = new Rectangle(catHolderPositions[2].x, catHolderPositions[2].y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
-        mooCat = new Rectangle(catHolderPositions[3].x, catHolderPositions[3].y,  Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
+        baseCat = new BaseCat(catHolderPositions[0].x, catHolderPositions[0].y);
+        moonCat = new MoonCat(catHolderPositions[1].x, catHolderPositions[1].y);
+        brownCat = new BrownCat(catHolderPositions[2].x, catHolderPositions[2].y);
+        mooCat = new MooCat(catHolderPositions[3].x, catHolderPositions[3].y);
 
         catTypes = new Array<>();
         catTypes.add(baseCat);
@@ -206,8 +211,6 @@ public class Drop extends ApplicationAdapter {
         catAnimations.add(moonCatAnimation);
         catAnimations.add(brownCatAnimation);
         catAnimations.add(mooCatAnimation);
-
-
 
         // create the fishs array and spawn the first fish
         allFish = new Array<>();
@@ -262,8 +265,8 @@ public class Drop extends ApplicationAdapter {
     }
 
     private int checkWhichCat(Rectangle rectangle){
-        for(int i=0; i<catHolderPositions.length; i++){
-            if(rectangle.overlaps(new Rectangle(catHolderPositions[i].x,catHolderPositions[i].y,Cat.CAT_WIDTH,Cat.CAT_HEIGHT))) {
+        for(int i=0; i<catTypes.size; i++){
+            if(rectangle.overlaps(new Rectangle(catTypes.get(i).getBody().x, catTypes.get(i).getBody().y, Cat.CAT_BODY_WIDTH, Cat.CAT_BODY_HEIGHT))) {
                 return i;
             }
         }
@@ -271,21 +274,6 @@ public class Drop extends ApplicationAdapter {
     }
 
     //pls change this its annoying tbh even if you have to place a cat that you cant
-    private int getCatCost(int catID){
-        switch (catID) {
-            case 0:
-                return BaseCat.COST;
-            case 1:
-                return MoonCat.COST;
-            case 2:
-                return BrownCat.COST;
-            case 3:
-                return MooCat.COST;
-            default:
-                System.out.println("No cats found");
-        }
-        return -1;
-    }
 
     private Cat findCat(Vector3 touchPos){
         camera.unproject(touchPos);
@@ -353,7 +341,7 @@ public class Drop extends ApplicationAdapter {
 
         //Cats
         for (int i = 0; i < allCats.size; i++) {
-            timeElapsed.set(i, timeElapsed.get(i) + Gdx.graphics.getDeltaTime());
+            timeElapsed.set(i, timeElapsed.get(i) + myDeltaTime());
             batch.draw((TextureRegion) catAnimations.get(allCats.get(i).getTextureID()).getKeyFrame(timeElapsed.get(i)), allCats.get(i).getBody().x, allCats.get(i).getBody().y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
         }
 
@@ -370,16 +358,16 @@ public class Drop extends ApplicationAdapter {
         //World health
         font.draw(batch, "HP: " + health, 20, 460);
 
+
         //Cats inside holder (dummys)
-        batch.draw(moonCatImage, moonCat.x, moonCat.y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
-        batch.draw(baseCatImage, baseCat.x, baseCat.y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
-        batch.draw(brownCatImage, brownCat.x, brownCat.y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
-        batch.draw(mooCatImage, mooCat.x, mooCat.y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
+        for(int i= 0; i<catTypes.size; i++){
+            batch.draw((TextureRegion) catAnimations.get(catTypes.get(i).getTextureID()).getKeyFrame(0), catTypes.get(i).getBody().x, catTypes.get(i).getBody().y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
+        }
 
         //Gold cost for cats
         for(int i=0; i< catHolderPositions.length; i++){
-            font.setColor(gold < getCatCost(i) ? Color.RED : Color.WHITE);
-            font.draw(batch, getCatCost(i) + "", catHolderPositions[i].x + 25, catHolderPositions[i].y +5 );
+            font.setColor(gold < catTypes.get(i).getCost() ? Color.RED : Color.WHITE);
+            font.draw(batch, catTypes.get(i).getCost() + "", catHolderPositions[i].x - 10, catHolderPositions[i].y -28);
         }
         font.setColor(Color.WHITE);
 
@@ -404,7 +392,8 @@ public class Drop extends ApplicationAdapter {
             }
         }
 
-        if(catIsClicked){
+        //also draw when moving
+        if(catIsClicked || isMoving){
             shapeRenderer = new ShapeRenderer();
             Gdx.gl.glEnable(GL20.GL_BLEND);
             Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -421,7 +410,7 @@ public class Drop extends ApplicationAdapter {
             Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
             Cat cat = findCat(touchPos);
             if(cat!= null){
-                gold += getCatCost(cat.getTextureID())/2;
+                gold += catTypes.get(cat.getTextureID()).getCost()/2;
                 allCats.removeValue(cat, false);
                 catIsClicked = false;
             }
@@ -453,7 +442,7 @@ public class Drop extends ApplicationAdapter {
 
             int checkWhichCat = checkWhichCat(rectangle);
 
-            if (checkWhichCat != -1 && !isMoving && gold >= getCatCost(checkWhichCat)) {
+            if (checkWhichCat != -1 && !isMoving && gold >= catTypes.get(checkWhichCat).getCost()) {
                 Gdx.input.setInputProcessor(new InputProcessor() {
                     @Override
                     public boolean keyDown(int keycode) {
@@ -488,14 +477,15 @@ public class Drop extends ApplicationAdapter {
 
                         //figure out a way to make getCatCost a part of Cat class
                         //If the cats DONT overlap with the river OR any other cats AND the gold amount is above CAT_COST you can spawn the cat
-                        if (!helpOverlaps && gold >= getCatCost(checkWhichCat)) {
-                            gold -= getCatCost(checkWhichCat);
+                        if (!helpOverlaps && gold >= catTypes.get(checkWhichCat).getCost()) {
+                            gold -= catTypes.get(checkWhichCat).getCost();
                             spawnCat(touchPos.x, touchPos.y, checkWhichCat);
                         }
                         for(int i=0; i<catTypes.size; i++){
                             if(checkWhichCat == i){
-                                catTypes.get(i).x = catHolderPositions[i].x;
-                                catTypes.get(i).y = catHolderPositions[i].y;
+                                catTypes.get(i).getBody().x = catHolderPositions[i].x;
+                                catTypes.get(i).getBody().y = catHolderPositions[i].y;
+                                catTypes.get(i).setBodyPosition();
                                 break;
                             }
                         }
@@ -506,14 +496,21 @@ public class Drop extends ApplicationAdapter {
                     public boolean touchDragged(int screenX, int screenY, int pointer) {
                         isMoving = true;
                         Vector3 touchPos = new Vector3(screenX, screenY, 0);
+
                         camera.unproject(touchPos);
 
                         touchPosIsMoving = touchPos;
 
                         for(int i=0; i<catTypes.size; i++){
                             if(checkWhichCat == i){
-                                catTypes.get(i).x = touchPos.x - Cat.CAT_WIDTH / 2;
-                                catTypes.get(i).y = touchPos.y - Cat.CAT_HEIGHT / 2;
+                                catTypes.get(i).getBody().x = touchPos.x - Cat.CAT_BODY_WIDTH / 2;
+                                catTypes.get(i).getBody().y = touchPos.y - Cat.CAT_BODY_WIDTH / 2;
+
+                                catTypes.get(i).getRange().x = touchPos.x -  catTypes.get(i).getRange().width / 2;
+                                catTypes.get(i).getRange().y = touchPos.y -  catTypes.get(i).getRange().height / 2;
+
+                                helpCatRectangleRange = catTypes.get(i).getRange();
+                                helpCatRectangleBody = catTypes.get(i).getBody();
                                 break;
                             }
                         }
@@ -536,8 +533,8 @@ public class Drop extends ApplicationAdapter {
         }
 
         // make sure the moonCat stays within the screen bounds
-        if (moonCat.x < 0) moonCat.x = 0;
-        if (moonCat.x > 800 - 32) moonCat.x = 800 - 32;
+        /*if (moonCat.x < 0) moonCat.x = 0;
+        if (moonCat.x > 800 - 32) moonCat.x = 800 - 32;*/
 
         // check if we need to create a new fish
         if (TimeUtils.nanoTime() - lastDropTime > speed) spawnFish();
@@ -552,19 +549,19 @@ public class Drop extends ApplicationAdapter {
             }
 
             if (points[fish.getCurrentPoint()].x < fish.getRectangle().x) {
-                fish.getRectangle().x -= fish.getSpeed() * Gdx.graphics.getDeltaTime();
+                fish.getRectangle().x -= fish.getSpeed() * myDeltaTime();
                 fish.setDirectionLeft(true);
             }
             if (points[fish.getCurrentPoint()].x > fish.getRectangle().x) {
-                fish.getRectangle().x += fish.getSpeed() * Gdx.graphics.getDeltaTime();
+                fish.getRectangle().x += fish.getSpeed() * myDeltaTime();
                 fish.setDirectionLeft(false);
             }
 
             if (points[fish.getCurrentPoint()].y < fish.getRectangle().y) {
-                fish.getRectangle().y -= fish.getSpeed() * Gdx.graphics.getDeltaTime();
+                fish.getRectangle().y -= fish.getSpeed() * myDeltaTime();
             }
             if (points[fish.getCurrentPoint()].y > fish.getRectangle().y) {
-                fish.getRectangle().y += fish.getSpeed() * Gdx.graphics.getDeltaTime();
+                fish.getRectangle().y += fish.getSpeed() * myDeltaTime();
             }
 
             if (fish.getRectangle().y < 0) {
