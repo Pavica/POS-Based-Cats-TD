@@ -4,7 +4,6 @@ import com.badlogic.gdx.math.Rectangle;
 
 public class BaseCat extends Cat{
 
-    public static int COST = 100;
     public static int RANGE_WIDTH = 150;
     public static int RANGE_HEIGHT = 150;
     public BaseCat(float x, float y) {
@@ -13,6 +12,7 @@ public class BaseCat extends Cat{
             new Rectangle(x- CAT_BODY_WIDTH/2,y - CAT_BODY_HEIGHT/2,CAT_BODY_WIDTH,CAT_BODY_HEIGHT),
             100,
             500,
+            100,
             0,
             1);
     }

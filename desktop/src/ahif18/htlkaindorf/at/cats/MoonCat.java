@@ -12,6 +12,7 @@ public class MoonCat extends Cat{
                 new Rectangle(x- CAT_BODY_WIDTH/2,y - CAT_BODY_HEIGHT/2,CAT_BODY_WIDTH,CAT_BODY_HEIGHT),
                 100,
                 1000,
+                250,
                 1,
                 3);
     }
