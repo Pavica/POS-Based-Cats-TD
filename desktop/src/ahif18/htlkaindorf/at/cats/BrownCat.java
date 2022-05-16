@@ -1,19 +1,43 @@
 package ahif18.htlkaindorf.at.cats;
 
-import com.badlogic.gdx.math.Rectangle;
-
-public class BrownCat extends Cat{
-
-    public static int RANGE_WIDTH = 100;
-    public static int RANGE_HEIGHT = 100;
-
+public class BrownCat extends AoeCat{
+    //upgrade speed and aoe
     public BrownCat(float x, float y) {
-        super(new Rectangle(x - RANGE_WIDTH/2,y - RANGE_HEIGHT/2,RANGE_WIDTH,RANGE_HEIGHT),
-                new Rectangle(x- CAT_BODY_WIDTH/2,y - CAT_BODY_HEIGHT/2,CAT_BODY_WIDTH,CAT_BODY_HEIGHT),
-                500,
-                2500,
-                300,
-                2,
-                5);
+        super(x,y);
+    }
+
+    @Override
+    public int getDamage() {
+        return 500;
+    }
+
+    @Override
+    public float getAttackInterval() {
+        return 2500;
+    }
+
+    @Override
+    public int getCost() {
+        return 300;
+    }
+
+    @Override
+    public int getID() {
+        return 2;
+    }
+
+    @Override
+    public int getRangeWidth() {
+        return 100;
+    }
+
+    @Override
+    public int getRangeHeight() {
+        return 100;
+    }
+
+    @Override
+    public int getAoeAmount() {
+        return 5;
     }
 }

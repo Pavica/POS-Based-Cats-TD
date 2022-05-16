@@ -1,19 +1,38 @@
 package ahif18.htlkaindorf.at.cats;
 
-import com.badlogic.gdx.math.Rectangle;
-
-public class BaseCat extends Cat{
-
-    public static int RANGE_WIDTH = 150;
-    public static int RANGE_HEIGHT = 150;
+public class BaseCat extends SingleTargetCat{
+    //upgrade damage and range
     public BaseCat(float x, float y) {
-        super(
-            new Rectangle(x - RANGE_WIDTH/2,y - RANGE_HEIGHT/2,RANGE_WIDTH,RANGE_HEIGHT),
-            new Rectangle(x- CAT_BODY_WIDTH/2,y - CAT_BODY_HEIGHT/2,CAT_BODY_WIDTH,CAT_BODY_HEIGHT),
-            100,
-            500,
-            100,
-            0,
-            1);
+        super(x,y);
+    }
+
+    @Override
+    public int getDamage() {
+        return 100;
+    }
+
+    @Override
+    public float getAttackInterval() {
+        return 500;
+    }
+
+    @Override
+    public int getCost() {
+        return 100;
+    }
+
+    @Override
+    public int getID() {
+        return 0;
+    }
+
+    @Override
+    public int getRangeWidth(){
+        return 150;
+    }
+
+    @Override
+    public int getRangeHeight(){
+        return 150;
     }
 }

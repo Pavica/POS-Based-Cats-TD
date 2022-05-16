@@ -1,9 +1,42 @@
 package ahif18.htlkaindorf.at.fishes;
 
-import com.badlogic.gdx.math.Rectangle;
-
 public class AnglerFish extends Fish{
-    public AnglerFish(int currentPoint, Rectangle rectangle) {
-        super(currentPoint, rectangle, 500, 10, 4,50, 75,52,52);
+    public AnglerFish(float x, float y) {
+        super(x, y);
+    }
+
+    @Override
+    public int getBaseHealth() {
+        return 500;
+    }
+
+    @Override
+    public int getGoldDrop() {
+        return 10;
+    }
+
+    @Override
+    public int getID() {
+        return 4;
+    }
+
+    @Override
+    public int getDamage() {
+        return 50;
+    }
+
+    @Override
+    public float getSpeed() {
+        return 75;
+    }
+
+    @Override
+    public float getFishWidth() {
+        return 52;
+    }
+
+    @Override
+    public float getFishHeight() {
+        return 52;
     }
 }
