@@ -16,7 +16,7 @@ public class AnglerFish extends Fish{
     }
 
     @Override
-    public int getTextureID() {
+    public int getID() {
         return 4;
     }
 

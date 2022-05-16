@@ -19,7 +19,7 @@ public abstract class Fish {
 
     public abstract int getGoldDrop();
 
-    public abstract int getTextureID();
+    public abstract int getID();
 
     public abstract int getDamage();
 

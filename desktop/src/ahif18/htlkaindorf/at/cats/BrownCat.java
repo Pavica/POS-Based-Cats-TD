@@ -1,6 +1,7 @@
 package ahif18.htlkaindorf.at.cats;
 
 public class BrownCat extends AoeCat{
+    //upgrade speed and aoe
     public BrownCat(float x, float y) {
         super(x,y);
     }
@@ -21,7 +22,7 @@ public class BrownCat extends AoeCat{
     }
 
     @Override
-    public int getTextureID() {
+    public int getID() {
         return 2;
     }
 

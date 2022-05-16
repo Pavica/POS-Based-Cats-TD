@@ -1,6 +1,7 @@
 package ahif18.htlkaindorf.at.cats;
 
 public class MooCat extends SingleTargetCat{
+    //upgrade range and speed
     public MooCat(float x, float y) {
         super(x, y);
     }
@@ -21,7 +22,7 @@ public class MooCat extends SingleTargetCat{
     }
 
     @Override
-    public int getTextureID() {
+    public int getID() {
         return 3;
     }
 

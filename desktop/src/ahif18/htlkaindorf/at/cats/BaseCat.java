@@ -1,7 +1,7 @@
 package ahif18.htlkaindorf.at.cats;
 
 public class BaseCat extends SingleTargetCat{
-
+    //upgrade damage and range
     public BaseCat(float x, float y) {
         super(x,y);
     }
@@ -22,7 +22,7 @@ public class BaseCat extends SingleTargetCat{
     }
 
     @Override
-    public int getTextureID() {
+    public int getID() {
         return 0;
     }
 

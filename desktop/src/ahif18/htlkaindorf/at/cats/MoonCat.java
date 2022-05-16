@@ -1,6 +1,7 @@
 package ahif18.htlkaindorf.at.cats;
 
 public class MoonCat extends AoeCat{
+    //upgrade aoe and range
     public MoonCat(float x, float y) {
         super(x, y);
     }
@@ -21,7 +22,7 @@ public class MoonCat extends AoeCat{
     }
 
     @Override
-    public int getTextureID() {
+    public int getID() {
         return 1;
     }
 

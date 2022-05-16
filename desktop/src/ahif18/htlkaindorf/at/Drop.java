@@ -2,7 +2,6 @@ package ahif18.htlkaindorf.at;
 
 import java.util.Comparator;
 import java.util.Iterator;
-
 import ahif18.htlkaindorf.at.cats.*;
 import ahif18.htlkaindorf.at.fishes.AnglerFish;
 import ahif18.htlkaindorf.at.fishes.ClownFish;
@@ -303,9 +302,9 @@ public class Drop extends ApplicationAdapter {
     }
 
     private int checkWhichCat(Rectangle rectangle){
-        for(int i=0; i<catTypes.size; i++){
-            if(rectangle.overlaps(new Rectangle(catTypes.get(i).getBody().x, catTypes.get(i).getBody().y, Cat.CAT_BODY_WIDTH, Cat.CAT_BODY_HEIGHT))) {
-                return i;
+        for (Cat catType: catTypes){
+            if(catType.getBody().overlaps(rectangle)){
+                return catType.getID();
             }
         }
         return -1;
@@ -315,9 +314,10 @@ public class Drop extends ApplicationAdapter {
 
     private Cat findCat(Vector3 touchPos){
         camera.unproject(touchPos);
-        for(int i=0; i<allCats.size; i++){
-            if(new Rectangle(touchPos.x, touchPos.y, 0,0).overlaps(allCats.get(i).getBody())){
-                return allCats.get(i);
+        Rectangle touchPosRect = new Rectangle(touchPos.x, touchPos.y, 0,0);
+        for (Cat cat: allCats){
+            if(cat.getBody().overlaps(touchPosRect)){
+                return cat;
             }
         }
         return null;
@@ -366,10 +366,10 @@ public class Drop extends ApplicationAdapter {
         //Fish
         for (Fish fish : allFish) {
             if (fish.isDirectionLeft()) {
-                batch.draw(fishTextures.get(fish.getTextureID()), fish.getBody().x, fish.getBody().y, fish.getFishWidth(), fish.getFishHeight());
+                batch.draw(fishTextures.get(fish.getID()), fish.getBody().x, fish.getBody().y, fish.getFishWidth(), fish.getFishHeight());
 
             } else {
-                batch.draw(fishTextures.get(fish.getTextureID() + 1), fish.getBody().x, fish.getBody().y, fish.getFishWidth(), fish.getFishHeight());
+                batch.draw(fishTextures.get(fish.getID() + 1), fish.getBody().x, fish.getBody().y, fish.getFishWidth(), fish.getFishHeight());
             }
         }
 
@@ -380,7 +380,7 @@ public class Drop extends ApplicationAdapter {
         //Cats
         for (int i = 0; i < allCats.size; i++) {
             timeElapsed.set(i, timeElapsed.get(i) + myDeltaTime());
-            batch.draw((TextureRegion) catAnimations.get(allCats.get(i).getTextureID()).getKeyFrame(timeElapsed.get(i)), allCats.get(i).getBody().x, allCats.get(i).getBody().y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
+            batch.draw((TextureRegion) catAnimations.get(allCats.get(i).getID()).getKeyFrame(timeElapsed.get(i)), allCats.get(i).getBody().x, allCats.get(i).getBody().y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
         }
 
         //Cat Holder
@@ -396,18 +396,17 @@ public class Drop extends ApplicationAdapter {
         //World health
         font.draw(batch, "HP: " + health, 20, 460);
 
-
-        //Cats inside holder (dummys)
-        for(int i= 0; i<catTypes.size; i++){
-            batch.draw((TextureRegion) catAnimations.get(catTypes.get(i).getTextureID()).getKeyFrame(0), catTypes.get(i).getBody().x, catTypes.get(i).getBody().y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
-        }
-
         //Gold cost for cats
         for(int i=0; i< catHolderPositions.length; i++){
             font.setColor(gold < catTypes.get(i).getCost() ? Color.RED : Color.WHITE);
             font.draw(batch, catTypes.get(i).getCost() + "", catHolderPositions[i].x - 10, catHolderPositions[i].y -28);
         }
         font.setColor(Color.WHITE);
+
+        //Cats inside holder (dummys)
+        for(int i= 0; i<catTypes.size; i++){
+            batch.draw((TextureRegion) catAnimations.get(catTypes.get(i).getID()).getKeyFrame(0), catTypes.get(i).getBody().x, catTypes.get(i).getBody().y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
+        }
 
         //draw x if cat overlaps an area where you can not place it
         if(isMoving){
@@ -437,7 +436,7 @@ public class Drop extends ApplicationAdapter {
             Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
             shapeRenderer.setProjectionMatrix(camera.combined);
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-            shapeRenderer.setColor(Color.DARK_GRAY.r,Color.DARK_GRAY.g,Color.DARK_GRAY.b, 0.5f);
+            shapeRenderer.setColor(Color.DARK_GRAY.r,Color.DARK_GRAY.g,Color.DARK_GRAY.b, 0.4f);
             shapeRenderer.rect(helpCatRectangleRange.x, helpCatRectangleRange.y, helpCatRectangleRange.width, helpCatRectangleRange.height);
             shapeRenderer.rect(helpCatRectangleBody.x, helpCatRectangleBody.y, helpCatRectangleBody.width, helpCatRectangleBody.height);
             shapeRenderer.end();
@@ -448,14 +447,13 @@ public class Drop extends ApplicationAdapter {
             Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
             Cat cat = findCat(touchPos);
             if(cat!= null){
-                gold += catTypes.get(cat.getTextureID()).getCost()/2;
+                gold += catTypes.get(cat.getID()).getCost()/2;
                 allCats.removeValue(cat, false);
                 catIsClicked = false;
             }
         }
 
-
-        //showHitboxAll();
+        showHitboxAll();
 
         // process user input
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
@@ -505,11 +503,11 @@ public class Drop extends ApplicationAdapter {
                             gold -= catTypes.get(checkWhichCat).getCost();
                             spawnCat(touchPos.x, touchPos.y, checkWhichCat);
                         }
-                        for(int i=0; i<catTypes.size; i++){
-                            if(checkWhichCat == i){
-                                catTypes.get(i).getBody().x = catHolderPositions[i].x;
-                                catTypes.get(i).getBody().y = catHolderPositions[i].y;
-                                catTypes.get(i).setBodyPosition();
+                        for(Cat catType: catTypes){
+                            if(checkWhichCat == catType.getID()){
+                                catType.getBody().x = catHolderPositions[catType.getID()].x;
+                                catType.getBody().y = catHolderPositions[catType.getID()].y;
+                                catType.setBodyPosition();
                                 break;
                             }
                         }
@@ -527,16 +525,16 @@ public class Drop extends ApplicationAdapter {
 
                         touchPosIsMoving = touchPos;
 
-                        for(int i=0; i<catTypes.size; i++){
-                            if(checkWhichCat == i){
-                                catTypes.get(i).getBody().x = touchPos.x - Cat.CAT_BODY_WIDTH / 2;
-                                catTypes.get(i).getBody().y = touchPos.y - Cat.CAT_BODY_WIDTH / 2;
+                        for(Cat catType : catTypes){
+                            if(checkWhichCat == catType.getID()){
+                                catType.getBody().x = touchPos.x - Cat.CAT_BODY_WIDTH / 2;
+                                catType.getBody().y = touchPos.y - Cat.CAT_BODY_WIDTH / 2;
 
-                                catTypes.get(i).getRange().x = touchPos.x -  catTypes.get(i).getRange().width / 2;
-                                catTypes.get(i).getRange().y = touchPos.y -  catTypes.get(i).getRange().height / 2;
+                                catType.getRange().x = touchPos.x -  catType.getRange().width / 2;
+                                catType.getRange().y = touchPos.y -  catType.getRange().height / 2;
 
-                                helpCatRectangleRange = catTypes.get(i).getRange();
-                                helpCatRectangleBody = catTypes.get(i).getBody();
+                                helpCatRectangleRange = catType.getRange();
+                                helpCatRectangleBody = catType.getBody();
                                 break;
                             }
                         }
@@ -557,10 +555,6 @@ public class Drop extends ApplicationAdapter {
         } else {
             Gdx.input.setInputProcessor(null);
         }
-
-        // make sure the moonCat stays within the screen bounds
-        /*if (moonCat.x < 0) moonCat.x = 0;
-        if (moonCat.x > 800 - 32) moonCat.x = 800 - 32;*/
 
         // check if we need to create a new fish
         if (TimeUtils.nanoTime() - lastDropTime > speed) spawnFish();
@@ -590,11 +584,11 @@ public class Drop extends ApplicationAdapter {
         for (Cat cat : allCats) {
             Array<Integer> attackedFishId = cat.attack(allFish);
             if(attackedFishId!= null){
-                for(int i=0; i<attackedFishId.size; i++){
+                attackedFishId.forEach(attackedFish -> {
                     batch.begin();
-                    batch.draw(hit, allFish.get(attackedFishId.get(i)).getBody().x, allFish.get(attackedFishId.get(i)).getBody().y, allFish.get(attackedFishId.get(i)).getFishWidth(), allFish.get(attackedFishId.get(i)).getFishHeight());
+                    batch.draw(hit, allFish.get(attackedFish).getBody().x, allFish.get(attackedFish).getBody().y, allFish.get(attackedFish).getFishWidth(), allFish.get(attackedFish).getFishHeight());
                     batch.end();
-                }
+                });
             }
         }
     }

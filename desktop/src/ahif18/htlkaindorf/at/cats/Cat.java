@@ -37,7 +37,7 @@ public abstract class Cat {
 
     public abstract int getCost();
 
-    public abstract int getTextureID();
+    public abstract int getID();
 
     public abstract int getRangeWidth();
 
