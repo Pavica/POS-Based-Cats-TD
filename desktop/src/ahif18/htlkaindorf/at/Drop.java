@@ -8,10 +8,7 @@ import ahif18.htlkaindorf.at.fishes.ClownFish;
 import ahif18.htlkaindorf.at.fishes.Fish;
 import ahif18.htlkaindorf.at.fishes.VomitFish;
 import ahif18.htlkaindorf.at.libs.GifDecoder;
-import com.badlogic.gdx.ApplicationAdapter;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputProcessor;
+import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -20,18 +17,28 @@ import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.utils.viewport.StretchViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class Drop extends ApplicationAdapter {
     private static final int MAX_HEALTH = 100;
     private static final int GAME_SPEED = 1;
 
-    private int gold = 1000;
+    private int gold = 10000;
     private int speed = 1000000000;
     private int health = MAX_HEALTH;
     private int countFish = 0;
+
+    private Stage stage;
+    private Viewport viewport;
 
     private Texture clownFish;
     private Texture clownFishRotated;
@@ -49,17 +56,20 @@ public class Drop extends ApplicationAdapter {
     private Texture mooCatImage;
 
     private Texture catHolderImage;
+    private Texture catUpgradeImage;
     private Texture hit;
     private Texture x;
 
     private Sprite backgroundSprite;
     private Sprite backgroundBridgesSprite;
     private Sprite catHolderSprite;
+    private Sprite catUpgradeSprite;
 
     private SpriteBatch batch;
     private ShapeRenderer shapeRenderer;
 
     private BitmapFont font;
+    private BitmapFont font2;
 
     private OrthographicCamera camera;
 
@@ -75,7 +85,8 @@ public class Drop extends ApplicationAdapter {
     private Rectangle helpCatRectangleBody;
 
     private Rectangle catHolder;
-    private Array<Animation> catAnimations;
+    private Rectangle catUpgrade;
+    private Array<Animation<TextureRegion>> catAnimations;
     private Array<Texture> fishTextures;
     private Array<Cat> allCats;
     private Array<Fish> allFish;
@@ -83,6 +94,23 @@ public class Drop extends ApplicationAdapter {
 
     private boolean isMoving = false;
     private Vector3 touchPosIsMoving;
+
+    private boolean showHitbox = false;
+
+    private final InputMultiplexer multiplexer = new InputMultiplexer();
+
+    private boolean upgradeIsOpen = false;
+
+    private Button upgradeOne;
+    private Button upgradeTwo;
+    private Label upgradeOneText;
+    private Label upgradeTwoText;
+    private Label upgradeOneLabel;
+    private Label upgradeTwoLabel;
+    private Button closeUpgrade;
+    private Button deleteCat;
+
+    private Cat selectedCat;
 
     //0, 2, 3, 1
     private final Vector3[] catHolderPositions = {
@@ -127,11 +155,132 @@ public class Drop extends ApplicationAdapter {
         return Gdx.graphics.getDeltaTime() * GAME_SPEED;
     }
 
+    private void upgradeStageVisibility(boolean setVisibility){
+        deleteCat.setVisible(setVisibility);
+        closeUpgrade.setVisible(setVisibility);
+        upgradeTwoLabel.setVisible(setVisibility);
+        upgradeOneLabel.setVisible(setVisibility);
+        upgradeTwo.setVisible(setVisibility);
+        upgradeOne.setVisible(setVisibility);
+        upgradeOneText.setVisible(setVisibility);
+        upgradeTwoText.setVisible(setVisibility);
+    }
+
+    private void fillUpgradeStage(Cat cat){
+        upgradeOneLabel.setText(cat.getOneName() +" LVL "+ cat.getOne());
+        upgradeTwoLabel.setText(cat.getTwoName() +" LVL "+cat.getTwo());
+        upgradeOneText.setText(String.format("%.0f G",cat.getOneCost()));
+        upgradeTwoText.setText(String.format("%.0f G",cat.getTwoCost()));
+
+        helpCatRectangleRange = selectedCat.getRange();
+        helpCatRectangleBody = selectedCat.getBody();
+
+        System.out.println(selectedCat.getDamage());
+        System.out.println(selectedCat.getAttackInterval());
+    }
+
+    private void loadUpgradeStage(){
+        Label.LabelStyle LABEL_STYLE = new Label.LabelStyle(font2, Color.WHITE);
+        viewport = new StretchViewport(800, 400);
+        stage = new Stage(viewport);
+
+        Button.ButtonStyle buttonStyle = new Button.ButtonStyle();
+
+        upgradeOne = new Button(buttonStyle);
+        upgradeOne.setSize(60, 30);
+        upgradeOne.setPosition(577,20);
+
+        upgradeOne.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if(gold >= selectedCat.getOneCost() && selectedCat.getOne() < Cat.MAX_LEVEL){
+                    gold -= selectedCat.getOneCost();
+                    selectedCat.upgradeOne();
+                    selectedCat.updateRange();
+                    fillUpgradeStage(selectedCat);
+                }
+            }
+        });
+
+        upgradeOneText = new Label("", LABEL_STYLE);
+        upgradeOneText.setSize(60, 30);
+        upgradeOneText.setPosition(577,20);
+
+        upgradeTwo = new Button(buttonStyle);
+        upgradeTwo.setSize(60, 30);
+        upgradeTwo.setPosition(662,20);
+
+        upgradeTwo.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                if(gold >= selectedCat.getTwoCost() && selectedCat.getTwo() < Cat.MAX_LEVEL){
+                    gold -= selectedCat.getTwoCost();
+                    selectedCat.upgradeTwo();
+                    selectedCat.updateRange();
+                    fillUpgradeStage(selectedCat);
+                }
+            }
+        });
+
+        upgradeTwoText = new Label("", LABEL_STYLE);
+        upgradeTwoText.setSize(60, 30);
+        upgradeTwoText.setPosition(662,20);
+
+        deleteCat = new Button(buttonStyle);
+        deleteCat.setSize(25, 25);
+        deleteCat.setPosition(750,40);
+
+        deleteCat.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                deleteCat(selectedCat);
+            }
+        });
+
+        closeUpgrade = new Button(buttonStyle);
+        closeUpgrade.setSize(22, 20);
+        closeUpgrade.setPosition(765,77);
+
+        closeUpgrade.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                upgradeStageVisibility(false);
+                upgradeIsOpen = false;
+            }
+        });
+
+        upgradeOneLabel = new Label("", LABEL_STYLE);
+        upgradeOneLabel.setSize(60, 20);
+        upgradeOneLabel.setPosition(577,60);
+
+        upgradeTwoLabel = new Label("", LABEL_STYLE);
+        upgradeTwoLabel.setSize(60, 20);
+        upgradeTwoLabel.setPosition(662,60);
+
+        multiplexer.addProcessor(stage);
+
+        stage.addActor(deleteCat);
+        stage.addActor(closeUpgrade);
+        stage.addActor(upgradeTwoLabel);
+        stage.addActor(upgradeOneLabel);
+        stage.addActor(upgradeOneText);
+        stage.addActor(upgradeTwoText);
+        stage.addActor(upgradeTwo);
+        stage.addActor(upgradeOne);
+        upgradeStageVisibility(false);
+    }
+
     @Override
     public void create() {
+        Gdx.input.setInputProcessor(multiplexer);
+        font = FontGenerator.generateFreetypeFont(16);
+        font2 =FontGenerator.generateFreetypeFont(11);
+
+        loadUpgradeStage();
         // load the images for the droplet and the moonCat, 32x32 pixels each
         backgroundImage = new Texture(Gdx.files.internal("backgroundElements/background.png"));
         backgroundImageBridges = new Texture(Gdx.files.internal("backgroundElements/background-2.png"));
+        catUpgradeImage = new Texture(Gdx.files.internal("backgroundElements/upgradeBackground.png"));
 
         clownFish = new Texture(Gdx.files.internal("fishImages/fish.png"));
         clownFishRotated = new Texture(Gdx.files.internal("fishImages/fish2.png"));
@@ -160,10 +309,10 @@ public class Drop extends ApplicationAdapter {
         backgroundSprite =new Sprite(backgroundImage);
         backgroundBridgesSprite = new Sprite(backgroundImageBridges);
         catHolderSprite = new Sprite(catHolderImage);
+        catUpgradeSprite = new Sprite(catUpgradeImage);
 
         catHolder = new Rectangle(630,240,34*5, 48*5);
-
-        font = FontGenerator.generateFreetypeFont(16);
+        catUpgrade = new Rectangle(490, 0, 300, 120);
 
         // load the drop sound effect and the rain background "music"
         //dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.wav"));
@@ -200,7 +349,7 @@ public class Drop extends ApplicationAdapter {
         catAnimations.add(brownCatAnimation);
         catAnimations.add(mooCatAnimation);
 
-        // create the fishs array and spawn the first fish
+        // create the fish array and spawn the first fish
         allFish = new Array<>();
         spawnFish();
 
@@ -231,6 +380,7 @@ public class Drop extends ApplicationAdapter {
         }
 
         shapeRenderer.rect(catHolder.x, catHolder.y, catHolder.width, catHolder.height);
+        shapeRenderer.rect(catUpgrade.x, catUpgrade.y, catUpgrade.width, catUpgrade.height);
         shapeRenderer.end();
     }
 
@@ -256,6 +406,16 @@ public class Drop extends ApplicationAdapter {
         }
     }
 
+    private void deleteCat(Cat cat){
+        //temporary gold return solution should technically be half of all money spent
+            gold += catTypes.get(cat.getID()).getCost()/2 + cat.getOneCost()/2 + cat.getTwoCost()/2;
+            allCats.removeValue(cat, false);
+            catIsClicked = false;
+            upgradeIsOpen = false;
+            upgradeStageVisibility(false);
+    }
+
+
     //idea for proper fish spawning make two different values the amount of fish COUNT and the type of fish TYPE
     //intertwine them in some kind of array and make a method that reads it and spawns the fish accordingly
     private void spawnFish() {
@@ -277,27 +437,26 @@ public class Drop extends ApplicationAdapter {
         //for some reason the cat is a bit further to the right than it should be, you cna compensate for this by just making
         // the values uneven but i think that will break some automation down the line, but it probably wont be an issue considering
         // all the cats are the same so you would just have to decrease or increase it by a certain amount
-
+        Cat cat = null;
         switch (catID) {
             case 0:
-                Cat baseCat = new BaseCat(screenX, screenY);
-                allCats.add(baseCat);
+                cat= new BaseCat(screenX, screenY);
                 break;
             case 1:
-                Cat moonCat = new MoonCat(screenX, screenY);
-                allCats.add(moonCat);
+                cat = new MoonCat(screenX, screenY);
                 break;
             case 2:
-                Cat brownCat = new BrownCat(screenX, screenY);
-                allCats.add(brownCat);
+                cat = new BrownCat(screenX, screenY);
                 break;
             case 3:
-                Cat mooCat = new MooCat(screenX, screenY);
-                allCats.add(mooCat);
+                cat = new MooCat(screenX, screenY);
                 break;
             default:
                 System.out.println("No cats found");
         }
+        allCats.add(cat);
+        selectedCat = cat;
+        fillUpgradeStage(cat);
         timeElapsed.add(0f);
     }
 
@@ -310,10 +469,7 @@ public class Drop extends ApplicationAdapter {
         return -1;
     }
 
-    //pls change this its annoying tbh even if you have to place a cat that you cant
-
     private Cat findCat(Vector3 touchPos){
-        camera.unproject(touchPos);
         Rectangle touchPosRect = new Rectangle(touchPos.x, touchPos.y, 0,0);
         for (Cat cat: allCats){
             if(cat.getBody().overlaps(touchPosRect)){
@@ -324,20 +480,20 @@ public class Drop extends ApplicationAdapter {
     }
 
     private boolean checkIfOverlaps(Rectangle catPosition){
+        //if it overlaps river
         for (Rectangle riverPoint : riverHitbox) {
             if (catPosition.overlaps(riverPoint)) {
                 return true;
             }
         }
+        //if it overlaps any cat
         for (Cat cat : allCats) {
             if (catPosition.overlaps(cat.getBody())) {
                 return true;
             }
         }
-        if (catPosition.overlaps(catHolder)) {
-                return true;
-        }
-        return false;
+        //if it overlaps catHolder
+        return catPosition.overlaps(catHolder);
     }
 
     @Override
@@ -380,11 +536,17 @@ public class Drop extends ApplicationAdapter {
         //Cats
         for (int i = 0; i < allCats.size; i++) {
             timeElapsed.set(i, timeElapsed.get(i) + myDeltaTime());
-            batch.draw((TextureRegion) catAnimations.get(allCats.get(i).getID()).getKeyFrame(timeElapsed.get(i)), allCats.get(i).getBody().x, allCats.get(i).getBody().y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
+            batch.draw(catAnimations.get(allCats.get(i).getID()).getKeyFrame(timeElapsed.get(i)), allCats.get(i).getBody().x, allCats.get(i).getBody().y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
         }
 
         //Cat Holder
         catHolderSprite.draw(batch);
+
+        //Cat Upgrade
+        if(upgradeIsOpen){
+            catUpgradeSprite.draw(batch);
+            batch.draw(catAnimations.get(selectedCat.getID()).getKeyFrame(0), 493, 33, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
+        }
 
         //Gold
         GlyphLayout glyphLayout = new GlyphLayout();
@@ -403,9 +565,9 @@ public class Drop extends ApplicationAdapter {
         }
         font.setColor(Color.WHITE);
 
-        //Cats inside holder (dummys)
+        //Cats inside holder (dummies)
         for(int i= 0; i<catTypes.size; i++){
-            batch.draw((TextureRegion) catAnimations.get(catTypes.get(i).getID()).getKeyFrame(0), catTypes.get(i).getBody().x, catTypes.get(i).getBody().y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
+            batch.draw(catAnimations.get(catTypes.get(i).getID()).getKeyFrame(0), catTypes.get(i).getBody().x, catTypes.get(i).getBody().y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
         }
 
         //draw x if cat overlaps an area where you can not place it
@@ -419,17 +581,25 @@ public class Drop extends ApplicationAdapter {
 
         if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)){
             Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+            camera.unproject(touchPos);
+
+            Rectangle rect = new Rectangle(touchPos.x, touchPos.y, 0,0);
+
             Cat cat = findCat(touchPos);
             if(cat!= null){
+                upgradeIsOpen = true;
+                upgradeStageVisibility(true);
+
                 catIsClicked = true;
-                helpCatRectangleRange = cat.getRange();
-                helpCatRectangleBody = cat.getBody();
-            }else{
+                selectedCat = cat;
+                fillUpgradeStage(selectedCat);
+                //still draw the area when clicking the upgrade menu
+            }else if(!rect.overlaps(catUpgrade)){
                 catIsClicked = false;
             }
         }
 
-        //also draw when moving
+        //draw range when moving or when cat is clicked
         if(catIsClicked || isMoving){
             shapeRenderer = new ShapeRenderer();
             Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -442,18 +612,14 @@ public class Drop extends ApplicationAdapter {
             shapeRenderer.end();
             Gdx.gl.glDisable(GL20.GL_BLEND);
         }
-        //remove cat if right click and return half the money used to buy the cat (not including upgrades) temporary method
-        if(Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)){
-            Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
-            Cat cat = findCat(touchPos);
-            if(cat!= null){
-                gold += catTypes.get(cat.getID()).getCost()/2;
-                allCats.removeValue(cat, false);
-                catIsClicked = false;
-            }
+
+        if(Gdx.input.isKeyJustPressed(Input.Keys.F3)){
+            showHitbox = !showHitbox;
         }
 
-        showHitboxAll();
+        if(showHitbox){
+            showHitboxAll();
+        }
 
         // process user input
         if (Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
@@ -465,7 +631,7 @@ public class Drop extends ApplicationAdapter {
             int checkWhichCat = checkWhichCat(rectangle);
 
             if (checkWhichCat != -1 && !isMoving && gold >= catTypes.get(checkWhichCat).getCost()) {
-                Gdx.input.setInputProcessor(new InputProcessor() {
+                multiplexer.addProcessor(1,new InputProcessor() {
                     @Override
                     public boolean keyDown(int keycode) {
                         return false;
@@ -553,13 +719,17 @@ public class Drop extends ApplicationAdapter {
                 });
             }
         } else {
-            Gdx.input.setInputProcessor(null);
+            if(multiplexer.size() >= 2) {
+               for(int i=1; i<multiplexer.size(); i++){
+                   multiplexer.removeProcessor(i);
+               }
+            }
         }
 
         // check if we need to create a new fish
         if (TimeUtils.nanoTime() - lastDropTime > speed) spawnFish();
         speed *= 0.9995;
-        // move the fishs, remove any that are beneath the bottom edge of
+        // move the fish, remove any that are beneath the bottom edge of
         // the screen or that hit the moonCat. In the latter case we play back
         // a sound effect as well.
         for (Iterator<Fish> iter = allFish.iterator(); iter.hasNext(); ) {
@@ -591,6 +761,11 @@ public class Drop extends ApplicationAdapter {
                 });
             }
         }
+
+
+        //Stage2D
+        stage.act();
+        stage.draw();
     }
     @Override
     public void dispose() {
