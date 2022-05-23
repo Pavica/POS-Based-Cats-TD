@@ -8,6 +8,8 @@ import ahif18.htlkaindorf.at.fishes.ClownFish;
 import ahif18.htlkaindorf.at.fishes.Fish;
 import ahif18.htlkaindorf.at.fishes.VomitFish;
 import ahif18.htlkaindorf.at.libs.GifDecoder;
+import ahif18.htlkaindorf.at.waves.FishType;
+import ahif18.htlkaindorf.at.waves.Wave;
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -29,12 +31,14 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 public class Drop extends ApplicationAdapter {
-    private static final int MAX_HEALTH = 100;
-    private static final int GAME_SPEED = 1;
+    public static final int GAME_SPEED = 1;
+    public static final int MAX_HEALTH = 100;
 
-    private int gold = 10000;
-    private int speed = 1000000000;
+    private int gold = 500;
+    private int speed = 1000000000/GAME_SPEED;
     private int health = MAX_HEALTH;
+
+    private int countFishData = 0;
     private int countFish = 0;
 
     private Stage stage;
@@ -112,6 +116,10 @@ public class Drop extends ApplicationAdapter {
 
     private Cat selectedCat;
 
+    private Wave waves;
+    private boolean stopFishSpawn = false;
+    private Fish lastFishOfWave;
+
     //0, 2, 3, 1
     private final Vector3[] catHolderPositions = {
             new Vector3(677, 377,0),
@@ -120,7 +128,7 @@ public class Drop extends ApplicationAdapter {
             new Vector3(677, 297,0),
     };
 
-    private final Rectangle[] points = {
+    public static final Rectangle[] points = {
         new Rectangle(515,470,8,8),
         new Rectangle(515, 360, 8,8),
         new Rectangle(70,360, 8,8),
@@ -174,9 +182,6 @@ public class Drop extends ApplicationAdapter {
 
         helpCatRectangleRange = selectedCat.getRange();
         helpCatRectangleBody = selectedCat.getBody();
-
-        System.out.println(selectedCat.getDamage());
-        System.out.println(selectedCat.getAttackInterval());
     }
 
     private void loadUpgradeStage(){
@@ -276,6 +281,8 @@ public class Drop extends ApplicationAdapter {
         font = FontGenerator.generateFreetypeFont(16);
         font2 =FontGenerator.generateFreetypeFont(11);
 
+        waves = new Wave();
+
         loadUpgradeStage();
         // load the images for the droplet and the moonCat, 32x32 pixels each
         backgroundImage = new Texture(Gdx.files.internal("backgroundElements/background.png"));
@@ -351,8 +358,6 @@ public class Drop extends ApplicationAdapter {
 
         // create the fish array and spawn the first fish
         allFish = new Array<>();
-        spawnFish();
-
         allCats = new Array<>();
     }
 
@@ -382,6 +387,8 @@ public class Drop extends ApplicationAdapter {
         shapeRenderer.rect(catHolder.x, catHolder.y, catHolder.width, catHolder.height);
         shapeRenderer.rect(catUpgrade.x, catUpgrade.y, catUpgrade.width, catUpgrade.height);
         shapeRenderer.end();
+
+        stage.setDebugAll(showHitbox);
     }
 
     private void fishMove(Fish fish){
@@ -416,20 +423,48 @@ public class Drop extends ApplicationAdapter {
     }
 
 
-    //idea for proper fish spawning make two different values the amount of fish COUNT and the type of fish TYPE
-    //intertwine them in some kind of array and make a method that reads it and spawns the fish accordingly
     private void spawnFish() {
         Fish fish;
-        if(countFish % 15 == 0){
-            fish = new AnglerFish(points[0].x,points[0].y);
-        }else if(countFish % 5 == 0){
-            fish = new VomitFish(points[0].x,points[0].y);
-        }else{
-            fish = new ClownFish(points[0].x,points[0].y);
+        if(waves.getWaveCount() >= waves.getWaveAmount()){
+            //stop fish from spawning after last wave in generall (temporary solution)
+            stopFishSpawn = true;
+            return;
         }
-        allFish.add(fish);
-        lastDropTime = TimeUtils.nanoTime();
+
+        if(countFishData == waves.getWaveData()[waves.getWaveCount()].length){
+            lastFishOfWave = allFish.get(allFish.size-1);
+            speed = (int)(speed * waves.WAVE_SPEED_MULTIPLIER);
+            countFishData = 0;
+
+            //stop fish from spawning after wave
+            stopFishSpawn = true;
+            return;
+        }
+
+        for (FishType fishType : waves.getWaveData()[waves.getWaveCount()][countFishData].getFish()) {
+            switch (fishType) {
+                case ClownFish:
+                    fish = new ClownFish();
+                    break;
+                case VomitFish:
+                    fish = new VomitFish();
+                    break;
+                case AnglerFish:
+                    fish = new AnglerFish();
+                    break;
+                default:
+                    fish = null;
+                    break;
+            }
+            allFish.add(fish);
+        }
         countFish++;
+        if(countFish == waves.getWaveData()[waves.getWaveCount()][countFishData].getAmount()){
+            countFishData++;
+            countFish = 0;
+        }
+
+        lastDropTime = TimeUtils.nanoTime();
     }
 
     //add x, y coordinates to spawn the cat where you drag it
@@ -557,6 +592,9 @@ public class Drop extends ApplicationAdapter {
 
         //World health
         font.draw(batch, "HP: " + health, 20, 460);
+
+        //Wave
+        font.draw(batch, "Wave: " + ((waves.getWaveCount()+1) > waves.getWaveAmount() ? waves.getWaveAmount() : (waves.getWaveCount()+1)) +" / " + waves.getWaveAmount(), 20, 440);
 
         //Gold cost for cats
         for(int i=0; i< catHolderPositions.length; i++){
@@ -727,8 +765,8 @@ public class Drop extends ApplicationAdapter {
         }
 
         // check if we need to create a new fish
-        if (TimeUtils.nanoTime() - lastDropTime > speed) spawnFish();
-        speed *= 0.9995;
+        if (TimeUtils.nanoTime() - lastDropTime > speed && !stopFishSpawn) spawnFish();
+
         // move the fish, remove any that are beneath the bottom edge of
         // the screen or that hit the moonCat. In the latter case we play back
         // a sound effect as well.
@@ -758,6 +796,11 @@ public class Drop extends ApplicationAdapter {
                     batch.begin();
                     batch.draw(hit, allFish.get(attackedFish).getBody().x, allFish.get(attackedFish).getBody().y, allFish.get(attackedFish).getFishWidth(), allFish.get(attackedFish).getFishHeight());
                     batch.end();
+                    //start fish spawning again after last fish of wave is killed
+                    if(allFish.get(attackedFish) == lastFishOfWave && allFish.get(attackedFish).getHealth() <= 0){
+                        waves.setWaveCount(waves.getWaveCount() + 1);
+                        stopFishSpawn = false;
+                    }
                 });
             }
         }

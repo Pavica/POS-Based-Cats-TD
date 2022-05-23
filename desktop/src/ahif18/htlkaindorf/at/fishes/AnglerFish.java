@@ -1,10 +1,6 @@
 package ahif18.htlkaindorf.at.fishes;
 
 public class AnglerFish extends Fish{
-    public AnglerFish(float x, float y) {
-        super(x, y);
-    }
-
     @Override
     public float getBaseHealth() {
         return 500;
