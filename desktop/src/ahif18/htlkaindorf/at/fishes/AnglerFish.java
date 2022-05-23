@@ -6,7 +6,7 @@ public class AnglerFish extends Fish{
     }
 
     @Override
-    public int getBaseHealth() {
+    public float getBaseHealth() {
         return 500;
     }
 

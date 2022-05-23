@@ -8,14 +8,14 @@ public abstract class Fish {
 
     private int currentPoint = 0;
     private boolean directionLeft = false;
-    private int health;
+    private float health;
 
     public Fish(float x, float y) {
         this.body = new Rectangle(x, y, getFishWidth(), getFishHeight());
         health = getBaseHealth();
     }
 
-    public abstract int getBaseHealth();
+    public abstract float getBaseHealth();
 
     public abstract int getGoldDrop();
 
