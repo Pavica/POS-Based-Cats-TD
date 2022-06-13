@@ -1,5 +1,12 @@
 package ahif18.htlkaindorf.at.fishes;
 
+/**
+ * This class represents a ClownFish
+ *
+ * @author Clark | Luka
+ * @version 1.0
+ * Last modified: 23.05.2022
+ */
 public class ClownFish extends Fish{
     @Override
     public float getBaseHealth() {

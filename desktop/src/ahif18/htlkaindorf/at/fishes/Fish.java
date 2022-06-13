@@ -3,16 +3,34 @@ import ahif18.htlkaindorf.at.Drop;
 import com.badlogic.gdx.math.Rectangle;
 import lombok.Data;
 
+/**
+ * This class represents a Fish
+ *
+ * @author Clark | Luka
+ * @version 1.0
+ * Last modified: 23.05.2022
+ */
+
 @Data
 public abstract class Fish {
+    /** used for the hitbox of the body of a fish */
     private Rectangle body;
 
+    /** used for the note that the fish will travel towards*/
     private int currentPoint = 0;
+
+    /** used for the direction that the fish is facing */
     private boolean directionLeft = false;
+
+    /** health of a fish */
     private float health;
 
+    /**
+     * Specific constructor that is used identify the range and body hitbox of each fish created.
+     * The health of the fish will also be set in here.
+     */
     public Fish() {
-        this.body = new Rectangle(Drop.points[0].x,Drop.points[0].y, getFishWidth(), getFishHeight());
+        this.body = new Rectangle(Drop.points[0].x,Drop.points[0].y, getFishWidth(), getFishHeight());   
         health = getBaseHealth();
     }
 
