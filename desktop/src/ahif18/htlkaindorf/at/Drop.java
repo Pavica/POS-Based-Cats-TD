@@ -272,8 +272,6 @@ public class Drop extends ApplicationAdapter {
 
 
     /** used for the hitbox for not allowing something to be placed in the river */
-    //draw these so you can check if they align with the river and then use it as a hitbox for not allowing it to place
-    //BEFORE THAT CHECK IF YOU COULD DO IT WITH THE FIRST ONE
     private final Rectangle[] riverHitbox = {
             new Rectangle(points[0].x -10,points[0].y - 10,50,50),
             new Rectangle(points[1].x - 10,points[1].y - 10, 50,140),
@@ -467,20 +465,10 @@ public class Drop extends ApplicationAdapter {
         catHolder = new Rectangle(630,240,34*5, 48*5);
         catUpgrade = new Rectangle(490, 0, 300, 120);
 
-        // load the drop sound effect and the rain background "music"
-        //dropSound = Gdx.audio.newSound(Gdx.files.internal("drop.wav"));
-        //rainMusic = Gdx.audio.newMusic(Gdx.files.internal("rain.mp3"));
-
-        // start the playback of the background music immediately
-        //rainMusic.setLooping(true);
-        //rainMusic.play();
-
         // create the camera and the SpriteBatch
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 480);
         batch = new SpriteBatch();
-
-        //USE moonCat CODE FOR MOVING THE CATS WITH MOUSE
 
         // create a Rectangle to logically represent the moonCa
         catTypes = new Array<>();
@@ -589,7 +577,6 @@ public class Drop extends ApplicationAdapter {
         }
 
         if(countFishData == waves.getWaveData()[waves.getWaveCount()].length){
-            //for some reason doesnt work when you place cats too close to the beginning
             speed = (int)(speed * Wave.WAVE_SPEED_MULTIPLIER);
             countFishData = 0;
             //stop fish from spawning after wave
@@ -623,7 +610,6 @@ public class Drop extends ApplicationAdapter {
         lastDropTime = TimeUtils.nanoTime();
     }
 
-    //add x, y coordinates to spawn the cat where you drag it
     /**
      * method used to code how the attacks work for all single target cats, meaning only attacking one fish at a time
      *
@@ -632,9 +618,6 @@ public class Drop extends ApplicationAdapter {
      * @param catID :   id of the cat that is to be displayed
      */
     private void spawnCat(float screenX, float screenY, int catID){
-        //for some reason the cat is a bit further to the right than it should be, you cna compensate for this by just making
-        // the values uneven but i think that will break some automation down the line, but it probably wont be an issue considering
-        // all the cats are the same so you would just have to decrease or increase it by a certain amount
         Cat cat;
         switch (catID) {
             case 0:
@@ -927,10 +910,6 @@ public class Drop extends ApplicationAdapter {
 
                         boolean helpOverlaps = checkIfOverlaps(catPosition);
 
-                        //try to make it so that you cant move the cats if you dont have enough money
-
-                        //figure out a way to make getCatCost a part of Cat class
-                        //If the cats DONT overlap with the river OR any other cats AND the gold amount is above CAT_COST you can spawn the cat
                         if (!helpOverlaps && gold >= catTypes.get(checkWhichCat).getCost()) {
                             gold -= catTypes.get(checkWhichCat).getCost();
                             spawnCat(touchPos.x, touchPos.y, checkWhichCat);
