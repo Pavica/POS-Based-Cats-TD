@@ -1,5 +1,6 @@
 package ahif18.htlkaindorf.at.cats;
 
+import ahif18.htlkaindorf.at.Drop;
 import ahif18.htlkaindorf.at.fishes.Fish;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
@@ -16,7 +17,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public abstract class Cat {
+public abstract class Cat{
     //maybe change at some point to be dynamic
 
     /** width of every cat */
@@ -32,7 +33,7 @@ public abstract class Cat {
     public static float CAT_BODY_HEIGHT = 64;
     public static int MAX_LEVEL = 5;
 
-    public static enum names {
+    public enum names {
         ATK,
         Range,
         Speed,
@@ -91,7 +92,7 @@ public abstract class Cat {
     public abstract float getBaseAttackInterval();
 
     public float getAttackInterval(){
-        return  getBaseAttackInterval() - (getBaseAttackInterval() * getAttackIntervalMultiplier());
+        return  (getBaseAttackInterval() - (getBaseAttackInterval() * getAttackIntervalMultiplier())) / Drop.GAME_SPEED;
     }
 
     public abstract float getBaseRangeWidth();

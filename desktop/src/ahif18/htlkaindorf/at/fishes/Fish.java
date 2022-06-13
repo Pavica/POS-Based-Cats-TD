@@ -1,4 +1,5 @@
 package ahif18.htlkaindorf.at.fishes;
+import ahif18.htlkaindorf.at.Drop;
 import com.badlogic.gdx.math.Rectangle;
 import lombok.Data;
 
@@ -24,15 +25,12 @@ public abstract class Fish {
     /** health of a fish */
     private float health;
 
-
     /**
      * Specific constructor that is used identify the range and body hitbox of each fish created.
      * The health of the fish will also be set in here.
-     * @param x : used to identify the width of the range and body hitbox
-     * @param y : used to identify the height of the range and body hitbox
      */
-    public Fish(float x, float y) {
-        this.body = new Rectangle(x, y, getFishWidth(), getFishHeight());
+    public Fish() {
+        this.body = new Rectangle(Drop.points[0].x,Drop.points[0].y, getFishWidth(), getFishHeight());   
         health = getBaseHealth();
     }
 

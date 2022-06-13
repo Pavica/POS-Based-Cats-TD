@@ -8,16 +8,6 @@ package ahif18.htlkaindorf.at.fishes;
  * Last modified: 23.05.2022
  */
 public class AnglerFish extends Fish{
-
-    /**
-     * Specific constructor that is used identify the range and body hitbox of the angler fish.
-     * @param x : used to identify the width of the range and body hitbox
-     * @param y : used to identify the height of the range and body hitbox
-     */
-    public AnglerFish(float x, float y) {
-        super(x, y);
-    }
-
     @Override
     public float getBaseHealth() {
         return 500;
