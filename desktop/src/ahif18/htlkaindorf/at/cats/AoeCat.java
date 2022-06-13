@@ -3,6 +3,9 @@ package ahif18.htlkaindorf.at.cats;
 import ahif18.htlkaindorf.at.fishes.Fish;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 
 /**
  * This class represents an Area of Effect Cat
@@ -11,8 +14,11 @@ import com.badlogic.gdx.utils.TimeUtils;
  * @version 1.0
  * Last modified: 16.05.2022
  */
-
+@EqualsAndHashCode(callSuper = true)
+@Data
 public abstract class AoeCat extends Cat{
+    private int aoeAmountLevel = 1;
+
     public AoeCat(float x, float y) {
         super(x, y);
     }
@@ -42,5 +48,17 @@ public abstract class AoeCat extends Cat{
         return null;
     }
 
-    public abstract int getAoeAmount();
+    public abstract int getBaseAoeAmount();
+
+    public int getAoeAmount(){
+        return getBaseAoeAmount() + (aoeAmountLevel -1)* getAoeAmountMultiplierHelp();
+    }
+
+    public abstract int getAoeAmountMultiplierHelp();
+
+    public abstract float getBaseAoeAmountUpgradeCost();
+
+    public float getAoeAmountUpgradeCost(){
+        return getBaseAoeAmountUpgradeCost() * getAoeAmountLevel();
+    }
 }

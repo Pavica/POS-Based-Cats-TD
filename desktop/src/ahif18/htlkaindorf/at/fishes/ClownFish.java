@@ -19,7 +19,7 @@ public class ClownFish extends Fish{
     }
 
     @Override
-    public int getBaseHealth() {
+    public float getBaseHealth() {
         return 100;
     }
 

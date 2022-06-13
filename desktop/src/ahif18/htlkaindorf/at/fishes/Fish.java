@@ -22,7 +22,8 @@ public abstract class Fish {
     private boolean directionLeft = false;
 
     /** health of a fish */
-    private int health;
+    private float health;
+
 
     /**
      * Specific constructor that is used identify the range and body hitbox of each fish created.
@@ -35,7 +36,7 @@ public abstract class Fish {
         health = getBaseHealth();
     }
 
-    public abstract int getBaseHealth();
+    public abstract float getBaseHealth();
 
     public abstract int getGoldDrop();
 
