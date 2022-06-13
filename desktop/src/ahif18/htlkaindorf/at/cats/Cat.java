@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public abstract class Cat {
+public abstract class Cat{
     //maybe change at some point to be dynamic
     public static float CAT_WIDTH = 75;
     public static float CAT_HEIGHT = 75;

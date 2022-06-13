@@ -118,7 +118,6 @@ public class Drop extends ApplicationAdapter {
 
     private Wave waves;
     private boolean stopFishSpawn = false;
-    private Fish lastFishOfWave;
 
     //0, 2, 3, 1
     private final Vector3[] catHolderPositions = {
@@ -432,10 +431,9 @@ public class Drop extends ApplicationAdapter {
         }
 
         if(countFishData == waves.getWaveData()[waves.getWaveCount()].length){
-            lastFishOfWave = allFish.get(allFish.size-1);
-            speed = (int)(speed * waves.WAVE_SPEED_MULTIPLIER);
+            //for some reason doesnt work when you place cats too close to the beginning
+            speed = (int)(speed * Wave.WAVE_SPEED_MULTIPLIER);
             countFishData = 0;
-
             //stop fish from spawning after wave
             stopFishSpawn = true;
             return;
@@ -594,7 +592,7 @@ public class Drop extends ApplicationAdapter {
         font.draw(batch, "HP: " + health, 20, 460);
 
         //Wave
-        font.draw(batch, "Wave: " + ((waves.getWaveCount()+1) > waves.getWaveAmount() ? waves.getWaveAmount() : (waves.getWaveCount()+1)) +" / " + waves.getWaveAmount(), 20, 440);
+        font.draw(batch, "Wave: " + (Math.min((waves.getWaveCount() + 1), waves.getWaveAmount())) +" / " + waves.getWaveAmount(), 20, 440);
 
         //Gold cost for cats
         for(int i=0; i< catHolderPositions.length; i++){
@@ -796,15 +794,15 @@ public class Drop extends ApplicationAdapter {
                     batch.begin();
                     batch.draw(hit, allFish.get(attackedFish).getBody().x, allFish.get(attackedFish).getBody().y, allFish.get(attackedFish).getFishWidth(), allFish.get(attackedFish).getFishHeight());
                     batch.end();
-                    //start fish spawning again after last fish of wave is killed
-                    if(allFish.get(attackedFish) == lastFishOfWave && allFish.get(attackedFish).getHealth() <= 0){
-                        waves.setWaveCount(waves.getWaveCount() + 1);
-                        stopFishSpawn = false;
-                    }
                 });
             }
         }
 
+        //start fish spawning again after last fish of wave is killed
+        if(stopFishSpawn && allFish.isEmpty()){
+            waves.setWaveCount(waves.getWaveCount() + 1);
+            stopFishSpawn = false;
+        }
 
         //Stage2D
         stage.act();

@@ -13,5 +13,4 @@ public class FishData {
         this.fish = fish;
         this.amount = amount;
     }
-
 }
