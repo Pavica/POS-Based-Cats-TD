@@ -1,7 +1,21 @@
 package ahif18.htlkaindorf.at.cats;
 
+/**
+ * This class represents a BrownCat
+ *
+ * @author Clark | Luka
+ * @version 1.0
+ * Last modified: 16.05.2022
+ */
+
 public class BrownCat extends AoeCat{
     //upgrade speed and aoe
+
+    /**
+     * Specific constructor that is used identify the range and body hitbox of each cat created.
+     * @param x : used to identify the width of the range and body hitbox
+     * @param y : used to identify the height of the range and body hitbox
+     */
     public BrownCat(float x, float y) {
         super(x,y);
     }

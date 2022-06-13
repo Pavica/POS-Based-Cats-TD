@@ -24,66 +24,163 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 
+/**
+ * This class
+ *
+ * @author Clark | Luka
+ * @version 1.0
+ * Last modified: 23.05.2022
+ */
 public class Drop extends ApplicationAdapter {
+
+    /** used for the max health of a player */
     private static final int MAX_HEALTH = 100;
+
+    /** used to identify at which speed the game is running */
     private static final int GAME_SPEED = 1;
 
+
+    /** amount of gold that is available at the beginning of the game */
     private int gold = 1000;
+
+    /** speed of cats that they are spawned in (in milliseconds) */
     private int speed = 1000000000;
+
+    /** used for the max health of a player */
     private int health = MAX_HEALTH;
+
+    /** IDK */
     private int countFish = 0;
 
+
+    /** texture of the clownfish */
     private Texture clownFish;
+
+    /** texture of the clownFishRotated */
     private Texture clownFishRotated;
+
+    /** texture of the vomitFish */
     private Texture vomitFish;
+
+    /** texture of the vomitFishRotated */
     private Texture vomitFishRotated;
+
+    /** texture of the anglerFish */
     private Texture anglerFish;
+
+    /** texture of the anglerFishRotated */
     private Texture anglerFishRotated;
 
+
+    /** texture of the background image*/
     private Texture backgroundImage;
+
+    /** texture of the bridges in the background*/
     private Texture backgroundImageBridges;
 
+
+    /** texture of the base cat */
     private Texture baseCatImage;
+
+    /** texture of the moon cat */
     private Texture moonCatImage;
+
+    /** texture of the brown cat */
     private Texture brownCatImage;
+
+    /** texture of the moo cat */
     private Texture mooCatImage;
 
+
+    /** texture of the cat holder image in the top right corner */
     private Texture catHolderImage;
+
+    /** IDK */
     private Texture hit;
+
+    /** texture of the x that is shown when something cannot be placed */
     private Texture x;
 
+
+    /** Sprite of the background */
     private Sprite backgroundSprite;
+
+    /** Sprite of the bridges in the background */
     private Sprite backgroundBridgesSprite;
+
+    /** Sprite of the cat holder in the top right corner */
     private Sprite catHolderSprite;
 
+
+    /** IDK */
     private SpriteBatch batch;
+
+    /** IDK */
     private ShapeRenderer shapeRenderer;
 
+
+    /** Used for the font of the text that is shown */
     private BitmapFont font;
 
+
+    /** IDK */
     private OrthographicCamera camera;
 
+
+    /** IDK */
     private Array<Float> timeElapsed;
+
+    /** Array of cats that exist in the game */
     private Array<Cat> catTypes;
+
+    /** Used for the idle animation of the moon cat */
     Animation<TextureRegion> moonCatAnimation;
+
+    /** Used for the idle animation of the base cat */
     Animation<TextureRegion> baseCatAnimation;
+
+    /** Used for the idle animation of the brown cat */
     Animation<TextureRegion> brownCatAnimation;
+
+    /** Used for the idle animation of the moo cat */
     Animation<TextureRegion> mooCatAnimation;
 
+
+    /** boolean used to see if a cat has been clicked */
     private boolean catIsClicked = false;
+
+    /** IDK */
     private Rectangle helpCatRectangleRange;
+
+    /** IDK */
     private Rectangle helpCatRectangleBody;
 
+
+    /** Used for the cat holder in the top right corner */
     private Rectangle catHolder;
+
+    /** Array of animations of cat animations */
     private Array<Animation> catAnimations;
+
+    /** Array of textures of fish */
     private Array<Texture> fishTextures;
+
+    /** Array of all cats in the game */
     private Array<Cat> allCats;
+
+    /** Array of all fish in the game */
     private Array<Fish> allFish;
+
+    /** IDK */
     private long lastDropTime;
 
+
+    /** used for the max health of a player */
     private boolean isMoving = false;
     private Vector3 touchPosIsMoving;
 
+
+    /** used for the max health of a player */
     //0, 2, 3, 1
     private final Vector3[] catHolderPositions = {
             new Vector3(677, 377,0),
@@ -92,6 +189,8 @@ public class Drop extends ApplicationAdapter {
             new Vector3(677, 297,0),
     };
 
+
+    /** used for the max health of a player */
     private final Rectangle[] points = {
         new Rectangle(515,470,8,8),
         new Rectangle(515, 360, 8,8),
@@ -107,6 +206,8 @@ public class Drop extends ApplicationAdapter {
         new Rectangle(100, -10, 8,8)
     };
 
+
+    /** used for the max health of a player */
     //draw these so you can check if they align with the river and then use it as a hitbox for not allowing it to place
     //BEFORE THAT CHECK IF YOU COULD DO IT WITH THE FIRST ONE
     private final Rectangle[] riverHitbox = {
