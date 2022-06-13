@@ -42,9 +42,7 @@ public class Drop extends ApplicationAdapter {
     private static final int MAX_HEALTH = 100;
 
     /** used to identify at which speed the game is running */
-    private static final int GAME_SPEED = 1;
-
-
+    public static final int GAME_SPEED = 1;
 
     /** amount of gold that is available at the beginning of the game */
     private int gold = 10000;
