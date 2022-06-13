@@ -34,7 +34,7 @@ import com.badlogic.gdx.utils.viewport.StretchViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
 /**
- * This class
+ * This class is the main class where libGDX methods are used to run the process
  *
  * @author Clark | Luka
  * @version 1.0
@@ -64,9 +64,10 @@ public class Drop extends ApplicationAdapter {
     private int countFishData = 0;
 
     private Stage stage;
+
     private Viewport viewport;
   
-  /** texture of the clownfish */
+    /** texture of the clownfish */
     private Texture clownFish;
 
     /** texture of the clownFishRotated */
@@ -107,8 +108,10 @@ public class Drop extends ApplicationAdapter {
     /** texture of the cat holder image in the top right corner */
     private Texture catHolderImage;
 
+    /** texture of the cat upgrade image in the bottom right corner */
     private Texture catUpgradeImage;
 
+    /** texture of the hit effect that appear when a fish has been hit by a cat */
     private Texture hit;
 
     /** texture of the x that is shown when something cannot be placed */
@@ -124,14 +127,16 @@ public class Drop extends ApplicationAdapter {
     private Sprite catHolderSprite;
     private Sprite catUpgradeSprite;
 
-    /** IDK */
+    /** used to draw textures */
     private SpriteBatch batch;
 
-    /** IDK */
+    /** used to render the shapes */
     private ShapeRenderer shapeRenderer;
 
     /** Used for the font of the text that is shown */
     private BitmapFont font;
+
+    /** Used for another font of the text that is shown */
     private BitmapFont font2;
 
     /** IDK */
@@ -168,6 +173,7 @@ public class Drop extends ApplicationAdapter {
     /** Used for the cat holder in the top right corner */
     private Rectangle catHolder;
 
+    /** Used for the upgrade window in the bottom right corner */
     private Rectangle catUpgrade;
   
     /** Array of animations of cat animations */
@@ -185,31 +191,60 @@ public class Drop extends ApplicationAdapter {
     /** IDK */
     private long lastDropTime;
 
-    /** used for the max health of a player */
+    /** IDK */
     private boolean isMoving = false;
+
+    /** IDK */
     private Vector3 touchPosIsMoving;
 
+
+    /** IDK */
     private boolean showHitbox = false;
 
+    /** IDK */
     private final InputMultiplexer multiplexer = new InputMultiplexer();
 
+    /** IDK */
     private boolean upgradeIsOpen = false;
 
+
+    /** used for the button to upgrade the first stat*/
     private Button upgradeOne;
+
+    /** used for the button to upgrade the second stat*/
     private Button upgradeTwo;
+
+    /** used to display the text of the button for the first stat*/
     private Label upgradeOneText;
+
+    /** used to display the text of the button for the second stat*/
     private Label upgradeTwoText;
+
+    /** used to display the text of the label above the button of the first stat*/
     private Label upgradeOneLabel;
+
+    /** used to display the text of the label above the button of the second stat*/
     private Label upgradeTwoLabel;
+
+    /** used for the button to close the upgrade window */
     private Button closeUpgrade;
+
+    /** used for the button to delete a cat*/
     private Button deleteCat;
 
+
+    /** used to identify the cat that has been selected by the user*/
     private Cat selectedCat;
 
+
+    /** used for the button to delete a cat*/
     private Wave waves;
+
+    /** used to identify if the spawning of fish should stop or not*/
     private boolean stopFishSpawn = false;
 
     //0, 2, 3, 1
+    /** used to identify the positions of the cats in the cat holder*/
     private final Vector3[] catHolderPositions = {
             new Vector3(677, 377,0),
             new Vector3(747,297,0),
@@ -218,7 +253,7 @@ public class Drop extends ApplicationAdapter {
     };
 
 
-    /** used for the max health of a player */
+    /** used to identify the points on the map where the fish should change direction */
     public static final Rectangle[] points = {
 
         new Rectangle(515,470,8,8),
@@ -236,7 +271,7 @@ public class Drop extends ApplicationAdapter {
     };
 
 
-    /** used for the max health of a player */
+    /** used for the hitbox for not allowing something to be placed in the river */
     //draw these so you can check if they align with the river and then use it as a hitbox for not allowing it to place
     //BEFORE THAT CHECK IF YOU COULD DO IT WITH THE FIRST ONE
     private final Rectangle[] riverHitbox = {
@@ -253,10 +288,20 @@ public class Drop extends ApplicationAdapter {
             new Rectangle(points[11].x - 10,points[11].y - 10, 60,100)
     };
 
+    /**
+     * method used to return the delta time based on the current game speed
+     *
+     * @return returns the delta time based on the current game speed
+     */
     private float myDeltaTime(){
         return Gdx.graphics.getDeltaTime() * GAME_SPEED;
     }
 
+    /**
+     * method used to display the window to upgrade a cat with its components
+     *
+     * @param setVisibility : boolean if the visibility should be set to true or false
+     */
     private void upgradeStageVisibility(boolean setVisibility){
         deleteCat.setVisible(setVisibility);
         closeUpgrade.setVisible(setVisibility);
@@ -268,6 +313,11 @@ public class Drop extends ApplicationAdapter {
         upgradeTwoText.setVisible(setVisibility);
     }
 
+    /**
+     * method used to generate and set the text that is shown in the upgrade window
+     *
+     * @param cat : the cat that is affected by the click actions
+     */
     private void fillUpgradeStage(Cat cat){
         upgradeOneLabel.setText(cat.getOneName() +" LVL "+ cat.getOne());
         upgradeTwoLabel.setText(cat.getTwoName() +" LVL "+cat.getTwo());
@@ -278,6 +328,7 @@ public class Drop extends ApplicationAdapter {
         helpCatRectangleBody = selectedCat.getBody();
     }
 
+    /** method used to generate the upgrade window */
     private void loadUpgradeStage(){
         Label.LabelStyle LABEL_STYLE = new Label.LabelStyle(font2, Color.WHITE);
         viewport = new StretchViewport(800, 400);
@@ -369,6 +420,7 @@ public class Drop extends ApplicationAdapter {
         upgradeStageVisibility(false);
     }
 
+    /** method used to create all textures, animations, sprites and other objects. */
     @Override
     public void create() {
         Gdx.input.setInputProcessor(multiplexer);
@@ -455,6 +507,7 @@ public class Drop extends ApplicationAdapter {
         allCats = new Array<>();
     }
 
+    /** method used to render the hitbox of every game element */
     private void showHitboxAll(){
         //RENDER THE HITBOX OF EVERYTHING
         shapeRenderer = new ShapeRenderer();
@@ -485,6 +538,11 @@ public class Drop extends ApplicationAdapter {
         stage.setDebugAll(showHitbox);
     }
 
+    /**
+     * method used to make the fish move in any of the four directions
+     *
+     * @param fish : fish that is affected by the movement actions
+     */
     private void fishMove(Fish fish){
         if (fish.getBody().overlaps(points[fish.getCurrentPoint()]) && fish.getCurrentPoint() != points.length - 1) {
             fish.setCurrentPoint(fish.getCurrentPoint() + 1);
@@ -507,6 +565,11 @@ public class Drop extends ApplicationAdapter {
         }
     }
 
+    /**
+     * method used to deleted the specified cat
+     *
+     * @param cat : cat that is affected by this action
+     */
     private void deleteCat(Cat cat){
         //temporary gold return solution should technically be half of all money spent
             gold += catTypes.get(cat.getID()).getCost()/2 + cat.getOneCost()/2 + cat.getTwoCost()/2;
@@ -516,7 +579,7 @@ public class Drop extends ApplicationAdapter {
             upgradeStageVisibility(false);
     }
 
-
+    /** method used to spawn fish (only one wave) */
     private void spawnFish() {
         Fish fish;
         if(waves.getWaveCount() >= waves.getWaveAmount()){
@@ -561,6 +624,13 @@ public class Drop extends ApplicationAdapter {
     }
 
     //add x, y coordinates to spawn the cat where you drag it
+    /**
+     * method used to code how the attacks work for all single target cats, meaning only attacking one fish at a time
+     *
+     * @param screenX : X coordinate where the generated chat should be displayed
+     * @param screenY : Y coordinate where the generated chat should be displayed
+     * @param catID :   id of the cat that is to be displayed
+     */
     private void spawnCat(float screenX, float screenY, int catID){
         //for some reason the cat is a bit further to the right than it should be, you cna compensate for this by just making
         // the values uneven but i think that will break some automation down the line, but it probably wont be an issue considering
@@ -641,6 +711,14 @@ public class Drop extends ApplicationAdapter {
         return -1;
     }
 
+    /**
+     * method used to find a cat based on its position
+     *
+     * @param touchPos : position (X, Y, (Z)) of the touch
+     *
+     * @return returns the cat that was searched for.
+     *         returns null if a cat cannot be found
+     */
     private Cat findCat(Vector3 touchPos){
         Rectangle touchPosRect = new Rectangle(touchPos.x, touchPos.y, 0,0);
         for (Cat cat: allCats){
@@ -651,6 +729,13 @@ public class Drop extends ApplicationAdapter {
         return null;
     }
 
+    /**
+     * method used to identify if the cat hitbox overlaps with the river, any other cat hitbox or the cat holder
+     *
+     * @param catPosition : position of the cat that is trying to be placed
+     *
+     * @return returns true if the cat hitbox overlaps with the river, any other cat hitbox or the cat holder
+     */
     private boolean checkIfOverlaps(Rectangle catPosition){
         //if it overlaps river
         for (Rectangle riverPoint : riverHitbox) {
@@ -953,6 +1038,7 @@ public class Drop extends ApplicationAdapter {
         stage.act();
         stage.draw();
     }
+
     @Override
     public void dispose() {
         // dispose of all the native resources
