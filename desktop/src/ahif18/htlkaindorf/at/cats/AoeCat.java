@@ -6,6 +6,14 @@ import com.badlogic.gdx.utils.TimeUtils;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+
+/**
+ * This class represents an Area of Effect Cat
+ *
+ * @author Clark | Luka
+ * @version 1.0
+ * Last modified: 16.05.2022
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
 public abstract class AoeCat extends Cat{
@@ -14,7 +22,13 @@ public abstract class AoeCat extends Cat{
     public AoeCat(float x, float y) {
         super(x, y);
     }
-
+    /**
+     * method used to code how the attacks work for all "Area of Effect" cats, meaning attacking multiple fish at a time
+     *
+     * @param allFish : Array of all fish that currently exist in the game
+     *
+     * @return returns all fish that just have been hit, otherwise returning null if no fish has been hit.
+     */
     @Override
     public Array<Integer> attack(Array<Fish> allFish){
         if (TimeUtils.timeSinceMillis(getCurrentInterval()) >= getAttackInterval()) {
