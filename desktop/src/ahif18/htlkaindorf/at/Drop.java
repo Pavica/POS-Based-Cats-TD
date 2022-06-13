@@ -2,7 +2,10 @@ package ahif18.htlkaindorf.at;
 
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.Random;
+
 import ahif18.htlkaindorf.at.cats.*;
+import ahif18.htlkaindorf.at.decorators.*;
 import ahif18.htlkaindorf.at.fishes.AnglerFish;
 import ahif18.htlkaindorf.at.fishes.ClownFish;
 import ahif18.htlkaindorf.at.fishes.Fish;
@@ -53,6 +56,8 @@ public class Drop extends ApplicationAdapter {
     /** used for the max health of a player */
     private int health = MAX_HEALTH;
 
+    Random rand = new Random();
+
     /** IDK */
     private int countFish = 0;
   
@@ -78,7 +83,6 @@ public class Drop extends ApplicationAdapter {
 
     /** texture of the anglerFishRotated */
     private Texture anglerFishRotated;
-
 
     /** texture of the background image*/
     private Texture backgroundImage;
@@ -561,7 +565,7 @@ public class Drop extends ApplicationAdapter {
         //for some reason the cat is a bit further to the right than it should be, you cna compensate for this by just making
         // the values uneven but i think that will break some automation down the line, but it probably wont be an issue considering
         // all the cats are the same so you would just have to decrease or increase it by a certain amount
-        Cat cat = null;
+        Cat cat;
         switch (catID) {
             case 0:
                 cat= new BaseCat(screenX, screenY);
@@ -576,9 +580,45 @@ public class Drop extends ApplicationAdapter {
                 cat = new MooCat(screenX, screenY);
                 break;
             default:
+                cat = null;
                 System.out.println("No cats found");
         }
+        ClothedCat helpCat = cat;
+        helpCat = new CatDecorator(helpCat);
+        helpCat.clothes();
+
+        int randomNumber = rand.nextInt(3);
+
+        switch(randomNumber){
+            case 0:
+                helpCat = new TopHatDecorator(helpCat);
+                helpCat.clothes();
+                break;
+            case 1:
+                helpCat = new TurkHatDecorator(helpCat);
+                helpCat.clothes();
+                break;
+            default:
+                break;
+        }
+
+        randomNumber = rand.nextInt(3);
+
+        switch(randomNumber){
+            case 0:
+                helpCat = new RibbonDecorator(helpCat);
+                helpCat.clothes();
+                break;
+            case 1:
+                helpCat = new GoldChainDecorator(helpCat);
+                helpCat.clothes();
+                break;
+            default:
+                break;
+        }
+        cat.setDecorations(helpCat.clothes());
         allCats.add(cat);
+
         selectedCat = cat;
         fillUpgradeStage(cat);
         timeElapsed.add(0f);
@@ -661,6 +701,9 @@ public class Drop extends ApplicationAdapter {
         for (int i = 0; i < allCats.size; i++) {
             timeElapsed.set(i, timeElapsed.get(i) + myDeltaTime());
             batch.draw(catAnimations.get(allCats.get(i).getID()).getKeyFrame(timeElapsed.get(i)), allCats.get(i).getBody().x, allCats.get(i).getBody().y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
+            for(int j=0; j<allCats.get(i).getDecorations().size; j++){
+                batch.draw(allCats.get(i).getDecorations().get(j), allCats.get(i).getBody().x, allCats.get(i).getBody().y, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
+            }
         }
 
         //Cat Holder
@@ -670,6 +713,9 @@ public class Drop extends ApplicationAdapter {
         if(upgradeIsOpen){
             catUpgradeSprite.draw(batch);
             batch.draw(catAnimations.get(selectedCat.getID()).getKeyFrame(0), 493, 33, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
+            for(int j=0; j<selectedCat.getDecorations().size; j++){
+                batch.draw(selectedCat.getDecorations().get(j), 493, 33, Cat.CAT_WIDTH, Cat.CAT_HEIGHT);
+            }
         }
 
         //Gold

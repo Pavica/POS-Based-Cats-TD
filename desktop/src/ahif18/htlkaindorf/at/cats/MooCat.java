@@ -119,6 +119,4 @@ public class MooCat extends SingleTargetCat{
     public String getTwoName() {
         return names.Speed.name();
     }
-
-
 }
