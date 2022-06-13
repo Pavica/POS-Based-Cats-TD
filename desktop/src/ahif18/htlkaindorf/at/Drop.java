@@ -48,7 +48,7 @@ public class Drop extends ApplicationAdapter {
     public static final int GAME_SPEED = 1;
 
     /** amount of gold that is available at the beginning of the game */
-    private int gold = 10000;
+    private int gold = 1000;
 
     /** speed of cats that they are spawned in (in milliseconds) */
     private int speed = 1000000000/GAME_SPEED;
@@ -587,7 +587,7 @@ public class Drop extends ApplicationAdapter {
         helpCat = new CatDecorator(helpCat);
         helpCat.clothes();
 
-        int randomNumber = rand.nextInt(3);
+        int randomNumber = rand.nextInt(4);
 
         switch(randomNumber){
             case 0:
@@ -596,6 +596,10 @@ public class Drop extends ApplicationAdapter {
                 break;
             case 1:
                 helpCat = new TurkHatDecorator(helpCat);
+                helpCat.clothes();
+                break;
+            case 2:
+                helpCat = new SwagDecorator(helpCat);
                 helpCat.clothes();
                 break;
             default:
@@ -611,6 +615,10 @@ public class Drop extends ApplicationAdapter {
                 break;
             case 1:
                 helpCat = new GoldChainDecorator(helpCat);
+                helpCat.clothes();
+                break;
+            case 2:
+                helpCat = new SonicShoesDecorator(helpCat);
                 helpCat.clothes();
                 break;
             default:
