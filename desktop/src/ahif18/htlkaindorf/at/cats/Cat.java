@@ -2,6 +2,7 @@ package ahif18.htlkaindorf.at.cats;
 
 import ahif18.htlkaindorf.at.Drop;
 import ahif18.htlkaindorf.at.fishes.Fish;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 import lombok.Data;
@@ -17,7 +18,7 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
-public abstract class Cat{
+public abstract class Cat implements ClothedCat{
     //maybe change at some point to be dynamic
 
     /** width of every cat */
@@ -46,8 +47,11 @@ public abstract class Cat{
     /** used for the hitbox of the body of a cat */
     private Rectangle body;
 
+    private Array<Texture> decorations = new Array<>();
+
     /** cooldown of attacks */
     private long currentInterval = 0;
+
     private int damageLevel = 1;
     private int rangeLevel = 1;
     private int attackIntervalLevel = 1;
@@ -62,7 +66,10 @@ public abstract class Cat{
         this.body = new Rectangle(x- CAT_BODY_WIDTH/2,y - CAT_BODY_HEIGHT/2,CAT_BODY_WIDTH,CAT_BODY_HEIGHT);
     }
 
-    //returns the ids of the affected fish
+    @Override
+    public Array<Texture> clothes() {
+        return new Array<>();
+    }
 
     /**
      * abstract class to return which fish had been attacked by the cat
