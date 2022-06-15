@@ -32,8 +32,11 @@ public abstract class Cat implements ClothedCat{
 
     /** height of hitbox of each cat */
     public static float CAT_BODY_HEIGHT = 64;
+
+    /** describes the maximum level an attribute can have */
     public static int MAX_LEVEL = 5;
 
+    /** enum for different cat attributes */
     public enum names {
         ATK,
         Range,
@@ -52,8 +55,11 @@ public abstract class Cat implements ClothedCat{
     /** cooldown of attacks */
     private long currentInterval = 0;
 
+    /** describes the level of the damage attribute*/
     private int damageLevel = 1;
+    /** describes the level of the range attribute*/
     private int rangeLevel = 1;
+    /** describes the level of the attack interval attribute*/
     private int attackIntervalLevel = 1;
 
     /**
