@@ -38,7 +38,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
  *
  * @author Clark | Luka
  * @version 1.0
- * Last modified: 23.05.2022
+ * Last modified: 15.06.2022
  */
 public class Drop extends ApplicationAdapter {
     /** used for the max health of a player */
@@ -168,10 +168,10 @@ public class Drop extends ApplicationAdapter {
     /** boolean used to see if a cat has been clicked */
     private boolean catIsClicked = false;
 
-    /** IDK */
+    /** used to draw the range of a cat when the cat is selected */
     private Rectangle helpCatRectangleRange;
 
-    /** IDK */
+    /** used to draw the body of a cat when the cat is selected*/
     private Rectangle helpCatRectangleBody;
 
     /** Used for the cat holder in the top right corner */

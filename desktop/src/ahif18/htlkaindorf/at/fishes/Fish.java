@@ -8,7 +8,7 @@ import lombok.Data;
  *
  * @author Clark | Luka
  * @version 1.0
- * Last modified: 23.05.2022
+ * Last modified: 15.06.2022
  */
 
 @Data
