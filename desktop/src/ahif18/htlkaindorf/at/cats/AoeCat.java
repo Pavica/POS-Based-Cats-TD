@@ -48,16 +48,21 @@ public abstract class AoeCat extends Cat{
         return null;
     }
 
+    /** returns the base AOE amount of the specified cat */
     public abstract int getBaseAoeAmount();
 
+    /** returns the real AOE amount of the specified cat. Including consideration for levels*/
     public int getAoeAmount(){
         return getBaseAoeAmount() + (aoeAmountLevel -1)* getAoeAmountMultiplierHelp();
     }
 
+    /** returns the help value used to calculate the AOE amount*/
     public abstract int getAoeAmountMultiplierHelp();
 
+    /** returns the base AOE amount upgrade cost of the specified cat.*/
     public abstract float getBaseAoeAmountUpgradeCost();
 
+    /** returns the real AOE amount cost of the specified cat. Including consideration for levels*/
     public float getAoeAmountUpgradeCost(){
         return getBaseAoeAmountUpgradeCost() * getAoeAmountLevel();
     }

@@ -34,18 +34,25 @@ public abstract class Fish {
         health = getBaseHealth();
     }
 
+    /** returns the base health value of a fish*/
     public abstract float getBaseHealth();
 
+    /** returns the gold value that a fish drops when it dies*/
     public abstract int getGoldDrop();
 
+    /** returns the id of a fish, used to identifying its type*/
     public abstract int getID();
 
+    /** returns the damage the fish does to a map*/
     public abstract int getDamage();
 
+    /** returns the speed at which a fish travels*/
     public abstract float getSpeed();
 
+    /** returns the width of a fish*/
     public abstract float getFishWidth();
 
+    /** returns the height of a fish*/
     public abstract float getFishHeight();
 }
 
