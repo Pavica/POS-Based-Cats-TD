@@ -56,15 +56,19 @@ public class Drop extends ApplicationAdapter {
     /** used for the max health of a player */
     private int health = MAX_HEALTH;
 
+    /** used to determine random clothes for cats*/
     Random rand = new Random();
 
-    /** IDK */
+    /** used to keep up with the count of fish in a fishData Object */
     private int countFish = 0;
-  
+
+    /** used to keep up with the count of fishData in a wave Object */
     private int countFishData = 0;
 
+    /** used to show the upgrade menu */
     private Stage stage;
 
+    /** used to show the upgrade menu */
     private Viewport viewport;
   
     /** texture of the clownfish */
@@ -139,10 +143,10 @@ public class Drop extends ApplicationAdapter {
     /** Used for another font of the text that is shown */
     private BitmapFont font2;
 
-    /** IDK */
+    /** is used to project and unproject a view */
     private OrthographicCamera camera;
 
-    /** IDK */
+    /** used to make every cat have their own animation cycle */
     private Array<Float> timeElapsed;
 
     /** Array of cats that exist in the game */
@@ -188,25 +192,23 @@ public class Drop extends ApplicationAdapter {
     /** Array of all fish in the game */
     private Array<Fish> allFish;
 
-    /** IDK */
+    /** used to determine the time between the spawning of fish */
     private long lastDropTime;
 
-    /** IDK */
+    /** used to tell if a cat is being moved */
     private boolean isMoving = false;
 
-    /** IDK */
+    /** used to tell the position of the moving cat */
     private Vector3 touchPosIsMoving;
 
-
-    /** IDK */
+    /** used to tell if the Hitbox should be shown */
     private boolean showHitbox = false;
 
-    /** IDK */
+    /** used to use and manipulate multiple Input Processors */
     private final InputMultiplexer multiplexer = new InputMultiplexer();
 
-    /** IDK */
+    /** used to tell if the upgrade window is open */
     private boolean upgradeIsOpen = false;
-
 
     /** used for the button to upgrade the first stat*/
     private Button upgradeOne;
@@ -497,7 +499,6 @@ public class Drop extends ApplicationAdapter {
 
     /** method used to render the hitbox of every game element */
     private void showHitboxAll(){
-        //RENDER THE HITBOX OF EVERYTHING
         shapeRenderer = new ShapeRenderer();
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
@@ -527,7 +528,7 @@ public class Drop extends ApplicationAdapter {
     }
 
     /**
-     * method used to make the fish move in any of the four directions
+     * method used to make the fish move in any of the eight directions
      *
      * @param fish : fish that is affected by the movement actions
      */
@@ -559,7 +560,6 @@ public class Drop extends ApplicationAdapter {
      * @param cat : cat that is affected by this action
      */
     private void deleteCat(Cat cat){
-        //temporary gold return solution should technically be half of all money spent
             gold += catTypes.get(cat.getID()).getCost()/2 + cat.getOneCost()/2 + cat.getTwoCost()/2;
             allCats.removeValue(cat, false);
             catIsClicked = false;
@@ -567,11 +567,10 @@ public class Drop extends ApplicationAdapter {
             upgradeStageVisibility(false);
     }
 
-    /** method used to spawn fish (only one wave) */
+    /** method used to spawn fish based on FishData Objects and Waves */
     private void spawnFish() {
         Fish fish;
         if(waves.getWaveCount() >= waves.getWaveAmount()){
-            //stop fish from spawning after last wave in generall (temporary solution)
             stopFishSpawn = true;
             return;
         }
@@ -579,7 +578,6 @@ public class Drop extends ApplicationAdapter {
         if(countFishData == waves.getWaveData()[waves.getWaveCount()].length){
             speed = (int)(speed * Wave.WAVE_SPEED_MULTIPLIER);
             countFishData = 0;
-            //stop fish from spawning after wave
             stopFishSpawn = true;
             return;
         }
@@ -611,31 +609,12 @@ public class Drop extends ApplicationAdapter {
     }
 
     /**
-     * method used to code how the attacks work for all single target cats, meaning only attacking one fish at a time
+     * method used to add random clothes to a specified clothedCat
      *
-     * @param screenX : X coordinate where the generated chat should be displayed
-     * @param screenY : Y coordinate where the generated chat should be displayed
-     * @param catID :   id of the cat that is to be displayed
+     * @param cat : the Cat Object being clothed
+     * @return returns a ClothedCat object
      */
-    private void spawnCat(float screenX, float screenY, int catID){
-        Cat cat;
-        switch (catID) {
-            case 0:
-                cat= new BaseCat(screenX, screenY);
-                break;
-            case 1:
-                cat = new MoonCat(screenX, screenY);
-                break;
-            case 2:
-                cat = new BrownCat(screenX, screenY);
-                break;
-            case 3:
-                cat = new MooCat(screenX, screenY);
-                break;
-            default:
-                cat = null;
-                System.out.println("No cats found");
-        }
+    private ClothedCat clotheCat(Cat cat){
         ClothedCat helpCat = cat;
         helpCat = new CatDecorator(helpCat);
         helpCat.clothes();
@@ -677,13 +656,41 @@ public class Drop extends ApplicationAdapter {
             default:
                 break;
         }
-        cat.setDecorations(helpCat.clothes());
-        allCats.add(cat);
+        return helpCat;
+    }
 
+    /**
+     * method used to spawn Cats based on a specified position and type.
+     *
+     * @param screenX : X coordinate where the generated chat should be displayed
+     * @param screenY : Y coordinate where the generated chat should be displayed
+     * @param catID :   id of the cat that is to be displayed
+     */
+    private void spawnCat(float screenX, float screenY, int catID){
+        Cat cat;
+        switch (catID) {
+            case 0:
+                cat= new BaseCat(screenX, screenY);
+                break;
+            case 1:
+                cat = new MoonCat(screenX, screenY);
+                break;
+            case 2:
+                cat = new BrownCat(screenX, screenY);
+                break;
+            case 3:
+                cat = new MooCat(screenX, screenY);
+                break;
+            default:
+                cat = null;
+                System.out.println("No cats found");
+        }
+        allCats.add(cat);
         selectedCat = cat;
         fillUpgradeStage(cat);
         timeElapsed.add(0f);
     }
+
 
     private int checkWhichCat(Rectangle rectangle){
         for (Cat catType: catTypes){
@@ -736,6 +743,9 @@ public class Drop extends ApplicationAdapter {
         return catPosition.overlaps(catHolder);
     }
 
+    /**
+     * LibGDX method used for updating the game every frame. All of the game is played out here.
+     */
     @Override
     public void render() {
         // clear the screen with a dark blue color. The
@@ -913,6 +923,8 @@ public class Drop extends ApplicationAdapter {
                         if (!helpOverlaps && gold >= catTypes.get(checkWhichCat).getCost()) {
                             gold -= catTypes.get(checkWhichCat).getCost();
                             spawnCat(touchPos.x, touchPos.y, checkWhichCat);
+                            ClothedCat clothedCat = clotheCat(selectedCat);
+                            selectedCat.setDecorations(clothedCat.clothes());
                         }
                         for(Cat catType: catTypes){
                             if(checkWhichCat == catType.getID()){
@@ -1018,9 +1030,9 @@ public class Drop extends ApplicationAdapter {
         stage.draw();
     }
 
+    /** used to dispose of all native resources */
     @Override
     public void dispose() {
-        // dispose of all the native resources
         clownFish.dispose();
         clownFishRotated.dispose();
         vomitFish.dispose();

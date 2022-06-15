@@ -86,83 +86,114 @@ public abstract class Cat implements ClothedCat{
         body.setY(body.getY() - CAT_BODY_HEIGHT/2);
     }
 
+    /** updates the range after a cats range attribute has been modified */
     public void updateRange(){
         range = new Rectangle(body.x - getRangeWidth()/2 + CAT_BODY_WIDTH/2, body.y - getRangeHeight()/2 + CAT_BODY_HEIGHT/2, getRangeWidth(), getRangeHeight());
     }
 
+    /** returns the baseDamage of the specified cat */
     public abstract float getBaseDamage();
 
+    /** returns the real damage of the specified cat. Including consideration for levels */
     public float getDamage(){
         return getBaseDamage() + (getBaseDamage() * getDamageMultiplier());
     }
 
+    /** returns the base attack interval in which a specified cat attacks*/
     public abstract float getBaseAttackInterval();
 
+    /** returns the real attack interval in which a specified cat attacks. Including consideration for levels*/
     public float getAttackInterval(){
         return  (getBaseAttackInterval() - (getBaseAttackInterval() * getAttackIntervalMultiplier())) / Drop.GAME_SPEED;
     }
 
+    /** returns the base range width of a specified cat*/
     public abstract float getBaseRangeWidth();
 
+    /** returns the real range width of a specified cat. Including consideration for levels*/
     public float getRangeWidth(){
         return  getBaseRangeWidth() + (getBaseRangeWidth() * getRangeMultiplier());
     }
 
+    /** returns the base range height of a specified cat*/
     public abstract float getBaseRangeHeight();
 
+    /** returns the real range height of a specified cat. Including consideration for levels*/
     public float getRangeHeight(){
         return  getBaseRangeHeight() + (getBaseRangeHeight() * getRangeMultiplier());
     }
 
+    /** returns the cost of a specified Cat*/
     public abstract int getCost();
 
+    /** returns the id of a specified Cat*/
     public abstract int getID();
 
+    /** returns a help value that is used ot calculate the damage*/
     public abstract float getDamageMultiplierHelp();
 
+    /** returns a help value that is used ot calculate the attack interval*/
     public abstract float getAttackIntervalMultiplierHelp();
 
+    /** returns a help value that is used ot calculate the range*/
     public abstract float getRangeMultiplierHelp();
 
+    /** returns the damage multiplier. Including consideration for levels*/
     public float getDamageMultiplier() {
         return getDamageMultiplierHelp() * (damageLevel -1);
     }
 
+    /** returns the attack interval multiplier. Including consideration for levels*/
     public float getAttackIntervalMultiplier(){
         return getAttackIntervalMultiplierHelp() * (attackIntervalLevel - 1);
     }
 
+    /** returns the range multiplier. Including consideration for levels*/
     public float getRangeMultiplier(){
         return getRangeMultiplierHelp() * (rangeLevel -1);
     }
 
+    /** returns the base Upgrade cost of the range*/
     public abstract float getBaseRangeUpgradeCost();
 
+    /** returns the base Upgrade cost of the damage*/
     public abstract float getBaseDamageUpgradeCost();
 
+    /** returns the base Upgrade cost of the attack interval*/
     public abstract float getBaseAttackIntervalUpgradeCost();
 
+    /** returns the real Upgrade cost of the Range. Including consideration for levels*/
     public float getRangeUpgradeCost(){
         return getBaseRangeUpgradeCost() * getRangeLevel();
     }
 
+    /** returns the real Upgrade cost of the Damage. Including consideration for levels*/
     public float getDamageUpgradeCost(){
         return getBaseDamageUpgradeCost() * getDamageLevel();
     }
 
+    /** returns the real Upgrade cost of the . Including consideration for levels*/
     public float getAttackIntervalUpgradeCost(){
         return getBaseAttackIntervalUpgradeCost() * getAttackIntervalLevel();
     }
 
+    /** method used to upgrade the first value in the upgrade menu*/
     public abstract void upgradeOne();
+    /** method used to upgrade the second value in the upgrade menu*/
     public abstract void upgradeTwo();
 
+    /** method used to get the first value in the upgrade menu*/
     public abstract int getOne();
+    /** method used to get the second value in the upgrade menu*/
     public abstract int getTwo();
 
+    /** method used to get the cost for the first value in the upgrade menu*/
     public abstract float getOneCost();
+    /** method used to get the cost for the second value in the upgrade menu*/
     public abstract float getTwoCost();
 
+    /** method used to get the name of the first value in the upgrade menu*/
     public abstract String getOneName();
+    /** method used to get the name of the second value in the upgrade menu*/
     public abstract String getTwoName();
 }
